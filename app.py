@@ -41,7 +41,7 @@ COMMANDS = {
     'mcshutdown': lambda: ssh_command('100.100.1.2', 'sudo poweroff'),
     'ai':         lambda: wol('04:7c:16:d7:3c:bf'),
     'mc':         lambda: wol('ec:b1:d7:3e:44:45'),
-    'mcips':      lambda: "Tailscale: johnylilmoney.nl | Zerotier: zt.johnylilmoney.nl"
+    'mcips':      lambda: "TailScale: johnylilmoney.nl | ZeroTier: zt.johnylilmoney.nl"
 }
 
 START_COMMANDS = {'ai': 'ai', 'mc': 'mc'}

@@ -286,7 +286,7 @@ window.initAnimation = function(shadowRoot) {
         
         ctx.fillStyle = midColor;
         ctx.beginPath();
-        ctx.ellipse(stumpX, stumpY - stumpHeight * 0.4, stumpWidth * 0.6, stumpHeight * 0.2, 0, 0, Math.PI * 2);
+        ctx.ellipse(stumpX, stumpY - stumpHeight * 0.4, stumpWidth * 0.4, stumpHeight * 0.2, 0, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.strokeStyle = 'rgba(42,45,58,0.4)';
