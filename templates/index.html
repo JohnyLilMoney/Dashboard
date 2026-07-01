@@ -3,13 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Server Dashboard</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="dashboard">
         <div class="header">
             <h1>Server Dashboard</h1>
+        </div>
+        <div class="server-card" id="mail-server">
+            <div class="card-top">
+                <h2>Mail Server</h2>
+                <span class="status-badge offline" id="mail-status-badge">
+                    <span class="status-dot"></span> Offline
+                </span>
+            </div>
+            <button class="expand-toggle" onclick="togglePanel('mail')" id="mail-toggle">
+                <span class="toggle-label">Details</span>
+                <span class="toggle-arrow" id="mail-arrow">▸</span>
+            </button>
+            <div class="expanded-panel" id="mail-panel">
+                <div class="panel-section">
+                    <span class="section-label">Uptime</span>
+                    <span class="uptime-value" id="mail-uptime">--</span>
+                </div>
+            </div>
         </div>
         <div class="server-card" id="ai-server">
             <div class="card-top">

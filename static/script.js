@@ -15,6 +15,11 @@ const serverState = {
             'Players Online': '0',
         },
         players_list: []
+    },
+    mail: {
+        status: 'offline',
+        uptime: null,
+        details: {}
     }
 };
 
@@ -210,6 +215,10 @@ async function fetchStatus() {
                 serverState.mc.details = data.mc.details;
             }
             serverState.mc.players_list = data.mc.players_list || [];
+        }
+        if (data.mail) {
+            serverState.mail.status = data.mail.status;
+            serverState.mail.uptime = data.mail.uptime;
         }
         updateAllUI();
         await updateModels();

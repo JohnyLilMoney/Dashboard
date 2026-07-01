@@ -5,6 +5,8 @@ I'm using tailscale with hardcoded ip adresses since they were all already on th
 Each server gets a hardcoded Details section here, you'd need to replace that with something that's relevant for your server.
 
 ### Setup instructions for when I forget how to add more servers
+On the webserver you need to pip install flask (if it's for private use) and requests, with this version also mcstatus (but that depends on what's shown in the details).
+Per server:
 First set up ssh keys for access without password on a user (e.g. remoteadmin) and give that user permission to reboot and poweroff without sudo/credentials.
 Then configure all the hardcoded stuff idk
 //todo

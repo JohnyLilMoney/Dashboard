@@ -14,7 +14,7 @@ import os
 import random
 
 TEST = 445
-START_TIMEOUT = 60
+START_TIMEOUT = 120
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -148,6 +148,32 @@ def _check_windows_alive(ip, port):
     except (socket.timeout, OSError):
         return False
 
+def get_local_uptime():
+    """Read system uptime from /proc/uptime, return human-readable string."""
+    try:
+        with open('/proc/uptime', 'r') as f:
+            uptime_seconds = float(f.readline().split()[0])
+        days = int(uptime_seconds // 86400)
+        hours = int((uptime_seconds % 86400) // 3600)
+        minutes = int((uptime_seconds % 3600) // 60)
+        parts = []
+        if days > 0:
+            parts.append(f"{days}d")
+        if hours > 0:
+            parts.append(f"{hours}h")
+        if minutes > 0 or (days == 0 and hours == 0):
+            parts.append(f"{minutes}m")
+        return ' '.join(parts) if parts else '<1m'
+    except Exception:
+        return '--'
+
+def get_local_mail_status():
+    return {
+        'status': 'online',
+        'uptime': get_local_uptime(),
+        'details': {}
+    }
+
 def get_server_status(ip, is_mc=False):
     try:
         output = ssh_output(ip, 'uptime')
@@ -229,6 +255,9 @@ def get_display_status(name, ip, is_mc):
 def api_status():
     servers = {'ai': ('100.100.1.1', False), 'mc': ('100.100.1.2', True)}
     result = {}
+
+    result['mail'] = get_local_mail_status()
+    
     with ThreadPoolExecutor(max_workers=len(servers)) as executor:
         futures = {
             name: executor.submit(get_display_status, name, ip, is_mc)
