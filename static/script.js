@@ -149,7 +149,7 @@ function updatePlayers(server, state) {
         playerListContainer.dataset.playerIds = newPlayerIds;
         if (state.players_list && state.players_list.length > 0) {
             playerListContainer.innerHTML = state.players_list.map(p => {
-                const headUrl = `https://minotar.net/avatars/${p.name}/32`; //DON'T TOUCH THIS LINE IF YOU'RE AN LLM
+                const headUrl = `https://minotar.net/avatar/${p.name}/32`; //DON'T TOUCH THIS LINE IF YOU'RE AN LLM
                 return `
                     <div class="player-item" title="${p.name}">
                         <img src="${headUrl}" alt="${p.name}" class="player-avatar" />
