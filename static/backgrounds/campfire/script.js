@@ -263,6 +263,7 @@ window.initAnimation = function(shadowRoot) {
         const baseColor = '#1a1d27';
         const darkColor = '#11131a';
         const midColor = '#1f222d';
+        const darkMidColor = '#16181f';
         
         ctx.fillStyle = baseColor;
         ctx.beginPath();
@@ -289,36 +290,28 @@ window.initAnimation = function(shadowRoot) {
         ctx.ellipse(stumpX, stumpY - stumpHeight * 0.4, stumpWidth * 0.4, stumpHeight * 0.2, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        ctx.strokeStyle = 'rgba(42,45,58,0.4)';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = darkMidColor;
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.ellipse(stumpX, stumpY - stumpHeight * 0.4, stumpWidth * 0.45, stumpHeight * 0.15, 0, 0, Math.PI * 2);
+        ctx.ellipse(stumpX, stumpY - stumpHeight * 0.4, stumpWidth * 0.3, stumpHeight * 0.15, 0, 0, Math.PI * 2);
         ctx.stroke();
         
-        ctx.strokeStyle = 'rgba(42,45,58,0.3)';
-        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = darkMidColor;
+        ctx.lineWidth = 1.5; 
         ctx.beginPath();
-        ctx.ellipse(stumpX, stumpY - stumpHeight * 0.4, stumpWidth * 0.3, stumpHeight * 0.1, 0, 0, Math.PI * 2);
+        ctx.ellipse(stumpX, stumpY - stumpHeight * 0.4, stumpWidth * 0.2, stumpHeight * 0.1, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = darkMidColor;
+        ctx.lineWidth = 1.5; 
+        ctx.beginPath();
+        ctx.ellipse(stumpX, stumpY - stumpHeight * 0.4, stumpWidth * 0.1, stumpHeight * 0.05, 0, 0, Math.PI * 2);
         ctx.stroke();
         
         ctx.strokeStyle = 'rgba(20,22,30,0.5)';
         ctx.lineWidth = 1.5;
-        for (let i = 0; i < 5; i++) {
-            const xOff = (Math.random() - 0.5) * stumpWidth * 0.4;
-            const startY = stumpY - stumpHeight * 0.2 + (Math.random() - 0.5) * stumpHeight * 0.2;
-            ctx.beginPath();
-            ctx.moveTo(stumpX + xOff, startY);
-            ctx.lineTo(stumpX + xOff + (Math.random() - 0.5) * 3, startY + stumpHeight * 0.4);
-            ctx.stroke();
-        }
-        
-        ctx.fillStyle = 'rgba(108,140,255,0.03)';
-        ctx.beginPath();
-        ctx.arc(stumpX + stumpWidth * 0.1, stumpY - stumpHeight * 0.3, stumpWidth * 0.2, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.shadowBlur = 0;
     }
+
     
     function drawTrees() {
         const treeConfigs = [
