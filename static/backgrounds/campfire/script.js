@@ -389,9 +389,6 @@ window.initAnimation = function(shadowRoot) {
         const fireX = width * config.fireBaseX;
         const fireY = height * config.fireBaseY;
 
-        //
-        // SHADOW MASK
-        //
         const shadow = ctx.createRadialGradient(
             fireX,
             fireY,
@@ -410,9 +407,6 @@ window.initAnimation = function(shadowRoot) {
         ctx.fillStyle = shadow;
         ctx.fillRect(0, 0, width, height);
 
-        //
-        // WARM LIGHT
-        //
         const light = ctx.createRadialGradient(
             fireX,
             fireY,
