@@ -120,13 +120,15 @@
             </div>
         </div>
     </div>
-    <div class="info-badge" id="infoBadge" onclick="showBackgroundInfo()">
-        <svg xmlns="http://w3.org" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; display: inline-block;">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
-    </div>
+    {% if animation_pack and animation_pack != 'None' %}
+        <div class="info-badge" id="infoBadge" onclick="showBackgroundInfo()">
+            <svg xmlns="http://w3.org" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; display: inline-block;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+        </div>
+    {% endif %}
 
     <div class="toast" id="toast"></div>
 
@@ -136,8 +138,9 @@
         (function() {
             const packName = "{{ animation_pack }}";
             const badge = document.getElementById('infoBadge');
-            if (badge) {
-                badge.dataset.background = packName || 'default';
+            if (badge && packName && packName !== 'None') {
+                badge.style.display = 'flex'; 
+                badge.dataset.background = packName;
             }
             if (!packName || packName === 'None') return;
 
