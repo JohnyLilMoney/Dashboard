@@ -38,7 +38,7 @@ COMMANDS = {
     'aireboot':   lambda: ssh_command('100.100.1.1', 'sudo reboot'),
     'mcreboot':   lambda: ssh_command('100.100.1.2', 'sudo reboot'),
     'aishutdown': lambda: ssh_command('100.100.1.1', 'sudo poweroff'),
-    'mcshutdown': lambda: ssh_command('100.100.1.2', 'sudo poweroff'),
+    'mcshutdown': lambda: ssh_command('100.100.1.2', 'sudo shutdown -h now'),
     'ai':         lambda: wol('04:7c:16:d7:3c:bf'),
     'mc':         lambda: wol('ec:b1:d7:3e:44:45'),
     'mcips':      lambda: "TailScale: johnylilmoney.nl | ZeroTier: zt.johnylilmoney.nl"
