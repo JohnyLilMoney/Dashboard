@@ -91,9 +91,9 @@ async function updateModels() {
         const psRes = await fetch('/api/ollama/ps');
         const psData = await psRes.json();
         if (psData.models && psData.models.length > 0) {
-            const loaded = psData.models;
-            state.loaded_model = loaded.name;
-            loadedModelEl.textContent = loaded.name;
+	    const loaded = psData.models[0];
+	    state.loaded_model = loaded.name;
+	    loadedModelEl.textContent = loaded.name;
         } else {
             state.loaded_model = null;
             loadedModelEl.textContent = '--';
@@ -206,8 +206,7 @@ function updateAllUI() {
                     if (isPlayersRow) {
                         updatePlayers(server, state);
                     } else if (isModelsRow) {
-                        rows[i].children[0].textContent = label;
-                        rows[i].children[1].textContent = value;
+			//do nothing for now
                     } else {
                         rows[i].children[0].textContent = label;
                         rows[i].children[1].textContent = value;
