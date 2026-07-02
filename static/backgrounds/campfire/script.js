@@ -346,9 +346,9 @@ window.initAnimation = function(shadowRoot) {
             ctx.fill();
             
             ctx.fillStyle = '#11131a';
-            ctx.fillRect(x - treeWidth * 0.08, baseY - treeHeight * 0.05, treeWidth * 0.16, treeHeight * 0.08);
+            ctx.fillRect(x - treeWidth * 0.08, baseY - treeHeight * 0.05, treeWidth * 0.16, treeHeight * 0.06);
             
-            ctx.fillStyle = 'rgba(180,210,255,0.06)';
+            ctx.fillStyle = 'rgba(180,210,255,0.05)';
             ctx.beginPath();
             ctx.moveTo(x, baseY - treeHeight * 0.35);
             ctx.lineTo(x - treeWidth * 0.5, baseY - treeHeight * 0.55);

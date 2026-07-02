@@ -17,6 +17,13 @@
 .dashboard {
     position: relative;
     z-index: 1;
+    transition: opacity 0.4s ease;  /* ← smooth fade */
+    will-change: transform, opacity;
+}
+
+/* When the info badge is hovered, fade the dashboard out */
+body:has(.info-badge:hover) .dashboard {
+    opacity: 0;
 }
 
 * {
@@ -136,8 +143,8 @@ body {
 .status-badge.unavailable {
     background: rgba(249, 115, 22, 0.1);
     color: var(--unavailable);
-    position: relative; /* Required for tooltip positioning */
-    cursor: help;       /* Changes cursor to a question/help mark */
+    position: relative;
+    cursor: help;
 }
 
 .status-badge.unavailable .status-dot {
@@ -153,7 +160,7 @@ body {
     bottom: 125%;
     left: 50%;
     transform: translateX(-50%);
-    background: #1e293b; /* Dark slate background */
+    background: #1e293b;
     color: #ffffff;
     padding: 6px 10px;
     border-radius: 6px;
