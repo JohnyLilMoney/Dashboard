@@ -13,7 +13,18 @@ window.initAnimation = function(shadowRoot) {
     let spreadFactor = 0;
     let baseSpread = 0;
 
-    const HORIZON_FRACTION = 0.62;
+    // ---------- Fixed 1080p values for the trapezoid width ----------
+    const REF_W = 1920;
+    const REF_H = 1080;
+    const REF_HORIZON_FRACTION = 0.62;          // as in the original
+    const REF_HORIZON_Y = REF_H * REF_HORIZON_FRACTION;
+    const REF_TRAPEZOID_HEIGHT = REF_H - REF_HORIZON_Y;        // 410.4 px
+    const REF_BASE_SPREAD = REF_W * 0.04;                     // 76.8 px
+    const REF_MAX_SPREAD = REF_W * 0.14;                      // 268.8 px
+    // spreadFactor is the increase in half‑width per vertical pixel
+    const REF_SPREAD_FACTOR = (REF_MAX_SPREAD - REF_BASE_SPREAD) / REF_TRAPEZOID_HEIGHT;
+
+    // ---------- Wave parameters (unchanged) ----------
     const WAVE_COUNT = 15;
     const MIN_SPEED = 0.25;
     const MAX_SPEED = 1.4;
@@ -24,6 +35,7 @@ window.initAnimation = function(shadowRoot) {
     const Y_JITTER = 0.03;
     const WAVE_COLOR = { r: 22, g: 25, b: 34, a: 0.32 };
 
+    // ---------- Wave class (unchanged) ----------
     class Wave {
         constructor(color, amplitude, frequency, speed, yOffset) {
             this.color = color;
@@ -49,6 +61,7 @@ window.initAnimation = function(shadowRoot) {
         }
     }
 
+    // ---------- Drawing functions (sky, sun, reflection) ----------
     function drawSky() {
         const grad = ctx.createLinearGradient(0, 0, 0, horizonY);
         grad.addColorStop(0, '#0a0c18');
@@ -130,6 +143,7 @@ window.initAnimation = function(shadowRoot) {
                 const y = baseY + sineVal * amp;
                 if (y < horizonY) continue;
 
+                // ---- Fixed trapezoid width (using 1080p values) ----
                 const halfWidth = baseSpread + (y - horizonY) * spreadFactor;
                 const left = sun.x - halfWidth;
                 const right = sun.x + halfWidth;
@@ -156,14 +170,15 @@ window.initAnimation = function(shadowRoot) {
         }
     }
 
+    // ---------- Wave generation (uses current horizon) ----------
     function generateWaves() {
         const generated = [];
         const color = `rgba(${WAVE_COLOR.r}, ${WAVE_COLOR.g}, ${WAVE_COLOR.b}, ${WAVE_COLOR.a})`;
+        const horizonFraction = horizonY / H;   // dynamic
 
         for (let i = 0; i < WAVE_COUNT; i++) {
             const t = WAVE_COUNT > 1 ? i / (WAVE_COUNT - 1) : 0;
-
-            let yOffset = HORIZON_FRACTION + t * (1 - HORIZON_FRACTION);
+            let yOffset = horizonFraction + t * (1 - horizonFraction);
             yOffset += (Math.random() - 0.5) * Y_JITTER;
 
             const amplitude = MIN_AMPLITUDE + t * (MAX_AMPLITUDE - MIN_AMPLITUDE);
@@ -178,17 +193,20 @@ window.initAnimation = function(shadowRoot) {
         return generated;
     }
 
+    // ---------- Initialisation (only the trapezoid width is fixed) ----------
     function init() {
         W = canvas.width = shadowRoot.clientWidth || window.innerWidth;
         H = canvas.height = shadowRoot.clientHeight || window.innerHeight;
-        horizonY = H * HORIZON_FRACTION;
+
+        // ---- Everything else is dynamic, just like the original ----
+        horizonY = H * 0.62;                           // original formula
         sun.x = W * 0.5;
         sun.y = horizonY;
-        sun.radius = Math.max(30, Math.min(48, W * 0.04));
+        sun.radius = Math.max(30, Math.min(48, W * 0.04)); // original
 
-        const maxHalfWidth = W * 0.14;
-        baseSpread = W * 0.04;
-        spreadFactor = (maxHalfWidth - baseSpread) / (H - horizonY);
+        // ---- Trapezoid parameters are fixed to 1080p values ----
+        baseSpread = REF_BASE_SPREAD;                 // 76.8 px
+        spreadFactor = REF_SPREAD_FACTOR;             // constant per‑pixel increase
 
         waves = generateWaves();
     }
