@@ -26,6 +26,8 @@ const serverState = {
 let bgPauseTimer = null; 
 window.__backgroundPaused = false; 
 
+let uiHidden = false;
+
 function togglePanel(server) {
     const card = document.getElementById(`${server}-server`);
     if (!card) return;
@@ -218,18 +220,50 @@ function updateAllUI() {
     }
 }
 
-function showToast(message) {
+function showToast(message, onClick = null) {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.classList.add('show');
+    toast.classList.toggle('clickable', !!onClick);
+    toast._onClick = onClick;
     clearTimeout(toast._timeout);
-    toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
+    toast._timeout = setTimeout(() => {
+        toast.classList.remove('show');
+        toast.classList.remove('clickable');
+        toast._onClick = null;
+    }, 3000);
+}
+
+document.getElementById('toast').addEventListener('click', () => {
+    const toast = document.getElementById('toast');
+    if (typeof toast._onClick === 'function') {
+        const callback = toast._onClick;
+        toast.classList.remove('show');
+        toast.classList.remove('clickable');
+        toast._onClick = null;
+        clearTimeout(toast._timeout);
+        callback();
+    }
+});
+
+function hideUI() {
+    uiHidden = true;
+    document.body.classList.add('ui-hidden');
+}
+
+function showUI() {
+    uiHidden = false;
+    document.body.classList.remove('ui-hidden');
 }
 
 function showBackgroundInfo() {
+    if (uiHidden) {
+        showUI();
+        return;
+    }
     const badge = document.getElementById('infoBadge');
     const bgName = badge ? badge.dataset.background : 'unknown';
-    showToast('johnylilmoney.nl/' + bgName);
+    showToast('johnylilmoney.nl/' + bgName, hideUI);
 }
 
 async function fetchStatus() {

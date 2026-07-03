@@ -26,6 +26,19 @@ body:has(.info-badge:hover) .dashboard {
     opacity: 0;
 }
 
+/* Persistent hidden state, triggered by clicking the background-info toast.
+   Unlike the hover-peek above, this also hides the info badge itself
+   (for OLED-friendly live-background use) and stays until the invisible
+   badge is clicked again. */
+body.ui-hidden .dashboard {
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.ui-hidden .info-badge {
+    opacity: 0;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -551,6 +564,11 @@ body {
 
 .toast.show {
     opacity: 1;
+    pointer-events: auto;
+}
+
+.toast.clickable {
+    cursor: pointer;
 }
 
 @media (max-width: 500px) {
@@ -584,7 +602,7 @@ body {
     backdrop-filter: blur(4px);
     color: rgba(200, 200, 200, 0.4);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease, opacity 0.3s ease;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
