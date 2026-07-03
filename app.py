@@ -52,23 +52,33 @@ def index():
     is_mobile = any(device in user_agent for device in ['mobile', 'android', 'iphone', 'ipad'])
 
     animation_pack = None
+
+    exclude = request.args.get("exclude")
+
     if not is_mobile:
-        backgrounds_path = os.path.join(app.static_folder, 'backgrounds')
-        if os.path.exists(backgrounds_path):
-            packs = [d for d in os.listdir(backgrounds_path)
-                     if os.path.isdir(os.path.join(backgrounds_path, d))]
-            if packs:
-                animation_pack = random.choice(packs)
+        packs = get_available_backgrounds(exclude)
+
+        if packs:
+            animation_pack = random.choice(packs)
 
     return render_template('index.html', animation_pack=animation_pack)
 
-def get_available_backgrounds():
-    """Get list of available background pack folders"""
+def get_available_backgrounds(exclude=None):
+    """Get list of available background pack folders."""
     backgrounds_path = os.path.join(app.static_folder, 'backgrounds')
-    if os.path.exists(backgrounds_path):
-        return [d for d in os.listdir(backgrounds_path) 
-                if os.path.isdir(os.path.join(backgrounds_path, d))]
-    return []
+
+    if not os.path.exists(backgrounds_path):
+        return []
+
+    packs = [
+        d for d in os.listdir(backgrounds_path)
+        if os.path.isdir(os.path.join(backgrounds_path, d))
+    ]
+
+    if exclude:
+        packs = [p for p in packs if p != exclude]
+
+    return packs
 
 @app.route('/<pack_name>')
 def background_pack(pack_name):

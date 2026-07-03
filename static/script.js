@@ -220,17 +220,33 @@ function updateAllUI() {
     }
 }
 
-function showToast(message, onClick = null) {
+function reloadDifferentBg() {
+    const badge = document.getElementById('infoBadge');
+    const current = badge ? badge.dataset.background : null;
+    if (current) {
+        window.location.href = '/?exclude=' + encodeURIComponent(current);
+    } else {
+        window.location.href = '/';
+    }
+}
+
+function showToast(message, onClick = null, showReload = false) {
     const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.classList.add('show');
+    const msgSpan = document.getElementById('toast-message');
+    const reloadBtn = document.getElementById('toast-reload-btn');
+
+    msgSpan.textContent = message;
+    reloadBtn.style.display = showReload ? 'inline-flex' : 'none';
     toast.classList.toggle('clickable', !!onClick);
     toast._onClick = onClick;
+
+    toast.classList.add('show');
     clearTimeout(toast._timeout);
     toast._timeout = setTimeout(() => {
         toast.classList.remove('show');
         toast.classList.remove('clickable');
         toast._onClick = null;
+        reloadBtn.style.display = 'none';
     }, 3000);
 }
 
@@ -249,6 +265,16 @@ document.getElementById('toast').addEventListener('click', () => {
 function hideUI() {
     uiHidden = true;
     document.body.classList.add('ui-hidden');
+
+    const toast = document.getElementById('toast');
+    const reloadBtn = document.getElementById('toast-reload-btn');
+
+    toast.classList.remove('show');
+    toast.classList.remove('clickable');
+    toast._onClick = null;
+    clearTimeout(toast._timeout);
+
+    reloadBtn.style.display = 'none';
 }
 
 function showUI() {
@@ -263,7 +289,7 @@ function showBackgroundInfo() {
     }
     const badge = document.getElementById('infoBadge');
     const bgName = badge ? badge.dataset.background : 'unknown';
-    showToast('johnylilmoney.nl/' + bgName, hideUI);
+    showToast('johnylilmoney.nl/' + bgName, hideUI, true);
 }
 
 async function fetchStatus() {

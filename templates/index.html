@@ -130,7 +130,29 @@
         </div>
     {% endif %}
 
-    <div class="toast" id="toast"></div>
+    <div class="toast-container">
+        <div class="toast" id="toast">
+            <span id="toast-message"></span>
+        </div>
+
+        <button id="toast-reload-btn"
+                class="reload-badge"
+                style="display:none;"
+                onclick="reloadDifferentBg()">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3.0"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+        </button>
+    </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 

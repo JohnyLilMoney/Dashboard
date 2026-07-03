@@ -17,19 +17,14 @@
 .dashboard {
     position: relative;
     z-index: 1;
-    transition: opacity 0.4s ease;  /* ← smooth fade */
+    transition: opacity 0.4s ease;
     will-change: transform, opacity;
 }
 
-/* When the info badge is hovered, fade the dashboard out */
 body:has(.info-badge:hover) .dashboard {
     opacity: 0;
 }
 
-/* Persistent hidden state, triggered by clicking the background-info toast.
-   Unlike the hover-peek above, this also hides the info badge itself
-   (for OLED-friendly live-background use) and stays until the invisible
-   badge is clicked again. */
 body.ui-hidden .dashboard {
     opacity: 0;
     pointer-events: none;
@@ -37,6 +32,11 @@ body.ui-hidden .dashboard {
 
 body.ui-hidden .info-badge {
     opacity: 0;
+}
+
+body.ui-hidden .reload-badge {
+    opacity: 0;
+    pointer-events: none;
 }
 
 * {
@@ -545,13 +545,10 @@ body {
 }
 
 .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
     background: #2d3143;
     color: var(--text);
-    padding: 12px 24px;
+    padding: 12px 20px;
     border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 500;
@@ -559,7 +556,11 @@ body {
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
-    z-index: 100;
+    display: flex;
+    align-items: center;
+    max-width: 90vw;
+    white-space: nowrap;
+    overflow: visible;
 }
 
 .toast.show {
@@ -613,6 +614,60 @@ body {
 
 .info-badge:active {
     transform: scale(0.94);
+}
+
+.reload-badge {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(45, 55, 72, 0.4);
+    backdrop-filter: blur(4px);
+    color: rgba(200, 200, 200, 0.4);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s ease, background 0.2s ease, opacity 0.3s ease;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+}
+
+.reload-badge:hover {
+    transform: scale(1.08);
+    background: rgba(55, 65, 85, 0.92);
+}
+
+.reload-badge:active {
+    transform: scale(0.94);
+}
+
+.toast.show .reload-badge {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.reload-badge svg {
+    width: 18px;
+    height: 18px;
 }
 
 @media (max-width: 480px) {
