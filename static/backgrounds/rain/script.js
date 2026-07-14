@@ -30,33 +30,23 @@ window.initAnimation = function(shadowRoot) {
         FALL_SPEED_MIN: 7,
         FALL_SPEED_MAX: 15,
 
-        // Uniform-random delay (seconds) between the end of one flash and the start of the next.
         MIN_DELAY: 15,
         MAX_DELAY: 60,
 
-        // How many quick pulses make up a single flash "event". Real lightning
-        // rarely reads as one clean fade - it flickers. Randomizing the count
-        // per event is most of what keeps flashes from feeling identical.
         FLASH_MIN_PULSES: 1,
         FLASH_MAX_PULSES: 3,
 
-        // Peak brightness of an individual pulse (0-1, before the "main pulse gets
-        // boosted / secondary pulses get dimmed" adjustment below).
         FLASH_MIN_OPACITY: 0.1,
         FLASH_MAX_OPACITY: 0.3,
 
-        // Timing of a single pulse, in ms. Rise is fast (a flash snaps on),
-        // fall is slower and variable (the afterglow lingers different amounts).
         FLASH_RISE_MIN: 8,
         FLASH_RISE_MAX: 12,
         FLASH_FALL_MIN: 120,
         FLASH_FALL_MAX: 300,
 
-        // Gap between pulses within the same flash event, in ms.
         FLASH_PULSE_GAP_MIN: 25,
         FLASH_PULSE_GAP_MAX: 160,
 
-        // Slight color variety so successive flashes don't look copy-pasted.
         FLASH_COLOR_VARIANTS: [
             'rgb(225, 233, 255)',
             'rgb(210, 222, 255)',
@@ -268,6 +258,9 @@ window.initAnimation = function(shadowRoot) {
         const deltaTime = timestamp - lastSpawnTime;
         lastSpawnTime = timestamp;
 
+        const MAX_FRAME_DELTA = 100;
+        if (deltaTime > MAX_FRAME_DELTA) deltaTime = MAX_FRAME_DELTA;
+
         ctx.fillStyle = CONFIG.COLOR_BG;
         ctx.fillRect(0, 0, width, height);
 
@@ -293,8 +286,6 @@ window.initAnimation = function(shadowRoot) {
             }
         }
 
-        // Lightning: count down to the next event, then run it to completion
-        // before scheduling the next delay.
         if (currentFlash) {
             const stillGoing = currentFlash.update(deltaTime);
             currentFlash.draw();
