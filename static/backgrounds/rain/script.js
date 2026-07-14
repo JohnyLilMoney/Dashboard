@@ -261,14 +261,12 @@ window.initAnimation = function(shadowRoot) {
         ctx.fillStyle = CONFIG.COLOR_BG;
         ctx.fillRect(0, 0, width, height);
 
-        if (!document.hidden) {
-            spawnAccumulator += deltaTime * (CONFIG.DROPS_PER_SECOND / 1000);
-            while (spawnAccumulator >= 1) {
-                raindrops.push(new Raindrop(width, height));
-                spawnAccumulator -= 1;
-            }
+        spawnAccumulator += CONFIG.DROPS_PER_SECOND / 60;
+        while (spawnAccumulator >= 1) {
+            raindrops.push(new Raindrop(width, height));
+            spawnAccumulator -= 1;
         }
-
+        
         for (let i = raindrops.length - 1; i >= 0; i--) {
             if (!raindrops[i].update()) {
                 raindrops.splice(i, 1);
