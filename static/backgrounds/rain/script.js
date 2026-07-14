@@ -258,16 +258,15 @@ window.initAnimation = function(shadowRoot) {
         const deltaTime = timestamp - lastSpawnTime;
         lastSpawnTime = timestamp;
 
-        const MAX_FRAME_DELTA = 100;
-        if (deltaTime > MAX_FRAME_DELTA) deltaTime = MAX_FRAME_DELTA;
-
         ctx.fillStyle = CONFIG.COLOR_BG;
         ctx.fillRect(0, 0, width, height);
 
-        spawnAccumulator += deltaTime * (CONFIG.DROPS_PER_SECOND / 1000);
-        while (spawnAccumulator >= 1) {
-            raindrops.push(new Raindrop(width, height));
-            spawnAccumulator -= 1;
+        if (!document.hidden) {
+            spawnAccumulator += deltaTime * (CONFIG.DROPS_PER_SECOND / 1000);
+            while (spawnAccumulator >= 1) {
+                raindrops.push(new Raindrop(width, height));
+                spawnAccumulator -= 1;
+            }
         }
 
         for (let i = raindrops.length - 1; i >= 0; i--) {
