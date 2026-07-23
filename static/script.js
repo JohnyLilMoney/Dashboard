@@ -28,6 +28,73 @@ window.__backgroundPaused = false;
 
 let uiHidden = false;
 
+// Deliberately just a plain variable, not sessionStorage/localStorage:
+// it lives only as long as this page stays loaded. Reload the page and
+// you're prompted again. The server is the one actually enforcing this
+// via short-lived tokens, this is just where the browser remembers it.
+let authToken = null;
+
+function requestAuthToken() {
+    return new Promise((resolve, reject) => {
+        const modal = document.getElementById('auth-modal');
+        const form = document.getElementById('auth-modal-form');
+        const input = document.getElementById('auth-password-input');
+        const errorEl = document.getElementById('auth-modal-error');
+        const cancelBtn = document.getElementById('auth-modal-cancel');
+
+        errorEl.textContent = '';
+        input.value = '';
+        modal.classList.add('show');
+        input.focus();
+
+        function cleanup() {
+            modal.classList.remove('show');
+            form.removeEventListener('submit', onSubmit);
+            cancelBtn.removeEventListener('click', onCancel);
+        }
+
+        async function onSubmit(e) {
+            e.preventDefault();
+            const password = input.value;
+            if (!password) return;
+
+            try {
+                const res = await fetch('/api/authenticate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.token) {
+                    authToken = data.token;
+                    cleanup();
+                    resolve(authToken);
+                } else {
+                    errorEl.textContent = data.error || 'Incorrect password';
+                    input.value = '';
+                    input.focus();
+                }
+            } catch (err) {
+                errorEl.textContent = 'Network error, try again';
+            }
+        }
+
+        function onCancel() {
+            cleanup();
+            reject(new Error('cancelled'));
+        }
+
+        form.addEventListener('submit', onSubmit);
+        cancelBtn.addEventListener('click', onCancel);
+    });
+}
+
+async function ensureAuthToken() {
+    if (authToken) return authToken;
+    return requestAuthToken();
+}
+
 function togglePanel(server) {
     const card = document.getElementById(`${server}-server`);
     if (!card) return;
@@ -68,9 +135,26 @@ async function sendCommand(command) {
             return;
         }
     }
+
+    try {
+        await ensureAuthToken();
+    } catch (err) {
+        return; // password prompt was cancelled
+    }
+
     showToast(`Sending "${command}" to ${serverName}...`);
     try {
-        const res = await fetch(`/api/run/${command}`, { method: 'POST' });
+        const res = await fetch(`/api/run/${command}`, {
+            method: 'POST',
+            headers: { 'X-Auth-Token': authToken }
+        });
+
+        if (res.status === 401) {
+            authToken = null; // token got rejected/expired, force a fresh login next time
+            showToast('Session expired, please try again');
+            return;
+        }
+
         const data = await res.json();
         if (!data.ok) {
             showToast('Command failed or server unreachable');
