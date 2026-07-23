@@ -681,3 +681,90 @@ body {
         font-size: 28px;
     }
 }
+.auth-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-modal-overlay.show {
+    display: flex;
+}
+
+.auth-modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    width: 260px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.auth-modal h3 {
+    margin: 0 0 14px;
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.auth-modal input[type="password"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.auth-modal input[type="password"]:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.auth-modal-error {
+    color: var(--offline);
+    font-size: 12px;
+    min-height: 16px;
+    margin-bottom: 6px;
+}
+
+.auth-modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.auth-modal-actions button {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.auth-modal-actions button:hover {
+    border-color: var(--accent);
+}
+
+.auth-modal-actions button[type="submit"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.auth-modal-actions button[type="submit"]:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
