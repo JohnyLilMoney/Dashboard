@@ -12,6 +12,9 @@ from mcstatus import JavaServer
 import requests
 import os
 import random
+import secrets
+import ipaddress
+from werkzeug.security import check_password_hash
 
 TEST = 445
 START_TIMEOUT = 120
@@ -44,7 +47,118 @@ COMMANDS = {
     'mcips':      lambda: "TailScale: johnylilmoney.nl | ZeroTier: zt.johnylilmoney.nl"
 }
 
-START_COMMANDS = {'ai': 'ai', 'mc': 'mc'}
+START_COMMANDS = {'ai': 'ai', 'mc': 'mc', 'aireboot': 'ai', 'mcreboot': 'mc'}
+
+# ---------------------------------------------------------------------------
+# Auth for the power buttons (start/restart/poweroff).
+#
+# Model: the browser asks for a password once, exchanges it for a short-lived
+# random token, and reuses that token for every subsequent button press until
+# the page is reloaded/closed. The password itself is never stored anywhere
+# except as a hash you set via an environment variable.
+#
+# Set it like this before starting the app:
+#   python3 -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('your-password-here'))"
+#   export DASHBOARD_PASSWORD_HASH='<paste the hash printed above>'
+# ---------------------------------------------------------------------------
+
+PASSWORD_HASH = os.environ.get('DASHBOARD_PASSWORD_HASH')
+
+TOKEN_TTL_SECONDS = 60 * 60 * 12  # tokens are valid for 12h, then need a re-login
+MAX_LOGIN_ATTEMPTS = 5
+LOCKOUT_SECONDS = 60
+
+_valid_tokens = {}       # token -> expiry timestamp
+_tokens_lock = threading.Lock()
+
+_failed_attempts = {}    # ip -> (fail_count, locked_until_timestamp)
+_attempts_lock = threading.Lock()
+
+# Commands that require a valid token before they're allowed to run.
+# Everything except the purely informational 'mcips' lookup.
+PROTECTED_COMMANDS = {name for name in COMMANDS if name != 'mcips'}
+
+# --- Tailscale hook (not wired up yet, safe to leave empty for now) --------
+# Once ts.johnylilmoney.nl is set up and the app is reachable through it in
+# a way where request.remote_addr can be trusted (e.g. bound directly to the
+# tailscale0 interface, or behind a reverse proxy on that interface that you
+# control), add the tailnet's CGNAT range here and requests from it will
+# skip the password prompt entirely. Nothing else needs to change.
+TRUSTED_NETWORKS = []  # e.g. [ipaddress.ip_network('100.64.0.0/10')]
+
+
+def _request_is_trusted():
+    if not TRUSTED_NETWORKS:
+        return False
+    try:
+        addr = ipaddress.ip_address(request.remote_addr)
+    except (ValueError, TypeError):
+        return False
+    return any(addr in net for net in TRUSTED_NETWORKS)
+
+
+def _is_locked_out(ip):
+    with _attempts_lock:
+        _, locked_until = _failed_attempts.get(ip, (0, 0))
+        return time.time() < locked_until
+
+
+def _register_failed_attempt(ip):
+    with _attempts_lock:
+        count, locked_until = _failed_attempts.get(ip, (0, 0))
+        count += 1
+        if count >= MAX_LOGIN_ATTEMPTS:
+            locked_until = time.time() + LOCKOUT_SECONDS
+            count = 0
+        _failed_attempts[ip] = (count, locked_until)
+
+
+def _clear_failed_attempts(ip):
+    with _attempts_lock:
+        _failed_attempts.pop(ip, None)
+
+
+def _issue_token():
+    token = secrets.token_urlsafe(32)
+    with _tokens_lock:
+        _valid_tokens[token] = time.time() + TOKEN_TTL_SECONDS
+    return token
+
+
+def _token_is_valid(token):
+    if not token:
+        return False
+    with _tokens_lock:
+        expiry = _valid_tokens.get(token)
+        if expiry is None:
+            return False
+        if time.time() > expiry:
+            del _valid_tokens[token]
+            return False
+        return True
+
+
+@app.route('/api/authenticate', methods=['POST'])
+def authenticate():
+    ip = request.remote_addr
+
+    if not PASSWORD_HASH:
+        # Fails safe: if no password is configured, protected commands stay locked.
+        return jsonify({'error': 'server has no password configured'}), 500
+
+    if _is_locked_out(ip):
+        return jsonify({'error': 'too many attempts, try again in a minute'}), 429
+
+    data = request.get_json(silent=True) or {}
+    password = data.get('password', '')
+
+    if check_password_hash(PASSWORD_HASH, password):
+        _clear_failed_attempts(ip)
+        return jsonify({'token': _issue_token()})
+
+    _register_failed_attempt(ip)
+    time.sleep(0.5)  # slow down brute-forcing a little
+    return jsonify({'error': 'incorrect password'}), 401
 
 @app.route('/')
 def index():
@@ -102,6 +216,11 @@ def background_pack(pack_name):
 def run_command(name):
     if name not in COMMANDS:
         return {'error': 'unknown command'}, 404
+
+    if name in PROTECTED_COMMANDS and not _request_is_trusted():
+        token = request.headers.get('X-Auth-Token')
+        if not _token_is_valid(token):
+            return {'error': 'auth required'}, 401
 
     try:
         result = COMMANDS[name]()
