@@ -130,6 +130,20 @@
         </div>
     {% endif %}
 
+    <div class="auth-modal-overlay" id="auth-modal">
+        <div class="auth-modal">
+            <h3>Enter password</h3>
+            <form id="auth-modal-form">
+                <input type="password" id="auth-password-input" placeholder="Password" autocomplete="current-password" required>
+                <div class="auth-modal-error" id="auth-modal-error"></div>
+                <div class="auth-modal-actions">
+                    <button type="button" id="auth-modal-cancel">Cancel</button>
+                    <button type="submit">Unlock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="toast-container">
         <div class="toast" id="toast">
             <span id="toast-message"></span>
