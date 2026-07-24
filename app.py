@@ -233,21 +233,17 @@ def ollama_tags():
 def ping_minecraft(ip, port=25565):
     try:
         server = JavaServer(ip, port)
-        status = server.status()
-        player_list = []
-        if status.players.sample:
-            for p in status.players.sample:
-                player_list.append({
-                    'name': p.name,
-                    'id': p.id
-                })
+        status = server.status(timeout=1.0)
         return {
-            'online': status.players.online,
-            'max': status.players.max,
-            'list': player_list
+            "online": True,
+            "players": status.players.online,
+            "max_players": status.players.max,
+            "latency": round(status.latency, 2),
+            "version": status.version.name,
+            "motd": status.description
         }
-    except Exception:
-        return None
+    except Exception as e:
+        return {"online": False, "error": str(e)}
 
 def _check_windows_alive(ip, port):
     try:
