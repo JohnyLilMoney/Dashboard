@@ -559,8 +559,11 @@ body {
     display: flex;
     align-items: center;
     max-width: 90vw;
-    white-space: nowrap;
-    overflow: visible;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    text-align: center; 
+    line-height: 1.4;    
 }
 
 .toast.show {
