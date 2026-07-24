@@ -14,7 +14,7 @@ def ssh_command(ip):
         ip, 'uptime'
     ]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=2)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=1)
         if result.returncode == 0:
             return result.stdout.strip()
         else:
