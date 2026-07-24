@@ -576,6 +576,13 @@ body {
 }
 
 @media (max-width: 500px) {
+    .toast {
+        max-width: 85vw;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 500px) {
     .card-top {
         flex-direction: column;
         align-items: flex-start;
