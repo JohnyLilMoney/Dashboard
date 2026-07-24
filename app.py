@@ -51,19 +51,6 @@ COMMANDS = {
 
 START_COMMANDS = {'ai': 'ai', 'mc': 'mc', 'aireboot': 'ai', 'mcreboot': 'mc'}
 
-# ---------------------------------------------------------------------------
-# Auth for the power buttons (start/restart/poweroff).
-#
-# Model: the browser asks for a password once, exchanges it for a short-lived
-# random token, and reuses that token for every subsequent button press until
-# the page is reloaded/closed. The password itself is never stored anywhere
-# except as a hash you set via an environment variable.
-#
-# Set it like this before starting the app:
-#   python3 -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('your-password-here'))"
-#   export DASHBOARD_PASSWORD_HASH='<paste the hash printed above>'
-# ---------------------------------------------------------------------------
-
 PASSWORD_HASH = os.environ.get('DASHBOARD_PASSWORD_HASH')
 
 TOKEN_TTL_SECONDS = 60 * 60 * 12  # tokens are valid for 12h, then need a re-login
@@ -80,13 +67,7 @@ _attempts_lock = threading.Lock()
 # Everything except the purely informational 'mcips' lookup.
 PROTECTED_COMMANDS = {name for name in COMMANDS if name != 'mcips'}
 
-# --- Tailscale hook (not wired up yet, safe to leave empty for now) --------
-# Once ts.johnylilmoney.nl is set up and the app is reachable through it in
-# a way where request.remote_addr can be trusted (e.g. bound directly to the
-# tailscale0 interface, or behind a reverse proxy on that interface that you
-# control), add the tailnet's CGNAT range here and requests from it will
-# skip the password prompt entirely. Nothing else needs to change.
-TRUSTED_NETWORKS = []  # e.g. [ipaddress.ip_network('100.64.0.0/10')]
+TRUSTED_NETWORKS = [ipaddress.ip_network('100.100.0.0/16')]
 
 
 def _request_is_trusted():
@@ -145,7 +126,6 @@ def authenticate():
     ip = request.remote_addr
 
     if not PASSWORD_HASH:
-        # Fails safe: if no password is configured, protected commands stay locked.
         return jsonify({'error': 'server has no password configured'}), 500
 
     if _is_locked_out(ip):
