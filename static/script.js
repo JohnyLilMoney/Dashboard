@@ -334,6 +334,15 @@ function showToast(message, onClick = null, showReload = false) {
     }, 3000);
 }
 
+function confirmWebsiteNav(url) {
+    const proceed = window.confirm(
+        'Will not load when not connected to TailScale or when the AI server is offline. Proceed?'
+    );
+    if (proceed) {
+        window.location.href = url;
+    }
+}
+
 document.getElementById('toast').addEventListener('click', () => {
     const toast = document.getElementById('toast');
     if (typeof toast._onClick === 'function') {
