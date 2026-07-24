@@ -282,10 +282,16 @@ def get_local_mail_status():
     }
 
 def get_server_status(ip, is_mc=False):
-    try:
-        output = ssh_output(ip, 'uptime')
-    except Exception:
-        output = None
+    if is_mc:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            ssh_future = executor.submit(ssh_output, ip, "uptime")
+            mc_future = executor.submit(ping_minecraft, ip)
+
+            output = ssh_future.result()
+            mc_info = mc_future.result()
+    else:
+        output = ssh_output(ip, "uptime")
+        mc_info = None
 
     if not output:
         if not is_mc and _check_windows_alive('100.100.2.2', TEST):
@@ -295,34 +301,87 @@ def get_server_status(ip, is_mc=False):
                 'details': {'Loaded Model': 'Booted into Windows'},
                 'models_list': []
             }
-        status_data = {'status': 'offline', 'uptime': None, 'details': {}}
+
+        status_data = {
+            'status': 'offline',
+            'uptime': None,
+            'details': {}
+        }
+
         if is_mc:
             status_data['details']['Players Online'] = '0'
             status_data['players_list'] = []
         else:
             status_data['details']['Loaded Model'] = '--'
+            status_data['models_list'] = []
+
         return status_data
 
     output = output.strip()
-    status_data = {'status': 'online', 'uptime': '--', 'details': {}}
+
+    status_data = {
+        'status': 'online',
+        'uptime': '--',
+        'details': {}
+    }
+
     if 'up ' in output:
         parts = output.split('up ')
         if len(parts) > 1:
             uptime_string = parts[1].split(',')[0].strip()
+
             days_match = re.search(r'(\d+)\s+day', uptime_string)
             days = f"{days_match.group(1)}d " if days_match else ""
-            time_remainder = re.sub(r'\d+\s+days?\,?\s*', '', uptime_string)
+
+            time_remainder = re.sub(
+                r'\d+\s+days?\,?\s*',
+                '',
+                uptime_string
+            )
+
             if ':' in time_remainder:
                 h_m = time_remainder.split(':')
-                status_data['uptime'] = f"{days}{int(h_m[0])}h {int(h_m[1])}m"
+                status_data['uptime'] = (
+                    f"{days}{int(h_m[0])}h {int(h_m[1])}m"
+                )
             else:
-                min_match = re.search(r'(\d+)\s+min', time_remainder)
+                min_match = re.search(
+                    r'(\d+)\s+min',
+                    time_remainder
+                )
                 if min_match:
-                    status_data['uptime'] = f"{days}{min_match.group(1)}m"
-                hour_match = re.search(r'(\d+)\s+hour', time_remainder)
-                if hour_match:
-                    status_data['uptime'] = f"{days}{hour_match.group(1)}h"
+                    status_data['uptime'] = (
+                        f"{days}{min_match.group(1)}m"
+                    )
 
+                hour_match = re.search(
+                    r'(\d+)\s+hour',
+                    time_remainder
+                )
+                if hour_match:
+                    status_data['uptime'] = (
+                        f"{days}{hour_match.group(1)}h"
+                    )
+
+    if is_mc:
+        if mc_info.get('online'):
+            status_data['details']['Players Online'] = (
+                f"{mc_info['players']}/{mc_info['max_players']}"
+            )
+
+            status_data['players_list'] = mc_info.get(
+                'players_list',
+                []
+            )
+        else:
+            status_data['details']['Players Online'] = '0'
+            status_data['players_list'] = []
+
+    else:
+        status_data['details'] = {'Loaded Model': '--'}
+        status_data['models_list'] = []
+
+    return status_data
     if is_mc:
         mc_info = ping_minecraft(ip)
         if mc_info:
