@@ -139,7 +139,7 @@ def authenticate():
         return jsonify({'token': _issue_token()})
 
     _register_failed_attempt(ip)
-    time.sleep(0.5)  # slow down brute-forcing a little
+    time.sleep(0.5)
     return jsonify({'error': 'incorrect password'}), 401
 
 @app.route('/')
@@ -363,8 +363,8 @@ _cache_lock = threading.Lock()
 _last_client_seen = 0.0
 _seen_lock = threading.Lock()
 
-POLL_INTERVAL = 1          # how often to actually check
-IDLE_TIMEOUT = 15          # stop checking if nobody's polled in this long
+POLL_INTERVAL = 1       
+IDLE_TIMEOUT = 15
 
 _cache_updated_at = 0.0
 
@@ -404,6 +404,7 @@ def api_status():
             _status_cache.update(fresh)
             _cache_updated_at = time.time()
         return dict(_status_cache)
-        
+
+# for use with flask, won't run if used with gunicorn
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, threaded=True)
