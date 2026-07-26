@@ -232,8 +232,8 @@ def ollama_tags():
 
 def ping_minecraft(ip, port=25565):
     try:
-        server = JavaServer(ip, port)
-        status = server.status(timeout=1.0)
+        server = JavaServer(ip, port, timeout=1)
+        status = server.status()
         return {
             "online": True,
             "players": status.players.online,
