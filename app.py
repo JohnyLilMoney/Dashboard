@@ -366,15 +366,19 @@ _seen_lock = threading.Lock()
 POLL_INTERVAL = 5          # how often to actually check
 IDLE_TIMEOUT = 15          # stop checking if nobody's polled in this long
 
-def _do_status_check():
-    servers = {'ai': ('100.100.1.1', False), 'mc': ('100.100.1.2', True)}
-    result = {'mail': get_local_mail_status()}
-    with ThreadPoolExecutor(max_workers=len(servers)) as executor:
-        futures = {name: executor.submit(get_display_status, name, ip, is_mc)
-                   for name, (ip, is_mc) in servers.items()}
-        for name, future in futures.items():
-            result[name] = future.result()
-    return result
+_cache_updated_at = 0.0
+
+def _status_loop():
+    global _cache_updated_at
+    while True:
+        with _seen_lock:
+            idle = time.time() - _last_client_seen > IDLE_TIMEOUT
+        if not idle:
+            fresh = _do_status_check()
+            with _cache_lock:
+                _status_cache.update(fresh)
+                _cache_updated_at = time.time()
+        time.sleep(POLL_INTERVAL)
 
 def _status_loop():
     while True:
@@ -390,11 +394,16 @@ threading.Thread(target=_status_loop, daemon=True).start()
 
 @app.route('/api/status')
 def api_status():
-    global _last_client_seen
+    global _last_client_seen, _cache_updated_at
     with _seen_lock:
         _last_client_seen = time.time()
     with _cache_lock:
-        return dict(_status_cache) if _status_cache else _do_status_check()
-
+        stale = (time.time() - _cache_updated_at) > IDLE_TIMEOUT
+        if stale:
+            fresh = _do_status_check()
+            _status_cache.update(fresh)
+            _cache_updated_at = time.time()
+        return dict(_status_cache)
+        
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, threaded=True)
