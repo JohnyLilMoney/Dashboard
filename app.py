@@ -130,10 +130,9 @@ def get_tailscale_identity(ip):
             capture_output=True, text=True, timeout=2, check=True
         )
         data = json.loads(result.stdout)
-        return data.get("UserProfile", {}).get("ComputedName")
+        return data.get("Node", {}).get("Hostinfo", {}).get("Hostname")
     except Exception:
         return None
-
 
 def get_tailscale_user_for_request():
     if not _request_is_trusted():
