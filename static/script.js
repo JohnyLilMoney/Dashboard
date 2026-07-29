@@ -95,7 +95,7 @@ async function ensureAuthToken() {
     return requestAuthToken();
 }
 
-function typeHeader(header, text, speed = 60) {
+function typeHeader(header, text, speed = 30) {
     header.textContent = '';
     let i = 0;
     (function tick() {
