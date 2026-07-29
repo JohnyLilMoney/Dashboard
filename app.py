@@ -56,7 +56,7 @@ START_COMMANDS = {'ai': 'ai', 'mc': 'mc', 'aireboot': 'ai', 'mcreboot': 'mc'}
 
 PASSWORD_HASH = os.environ.get('DASHBOARD_PASSWORD_HASH')
 
-TOKEN_TTL_SECONDS = 60 * 60 * 12  # tokens are valid for 12h, then need a re-login
+TOKEN_TTL_SECONDS = 43200  # tokens are valid for 12h, then need a re-login
 MAX_LOGIN_ATTEMPTS = 5
 LOCKOUT_SECONDS = 60
 
@@ -66,12 +66,11 @@ _tokens_lock = threading.Lock()
 _failed_attempts = {}    # ip -> (fail_count, locked_until_timestamp)
 _attempts_lock = threading.Lock()
 
-# Commands that require a valid token before they're allowed to run.
-# Everything except the purely informational 'mcips' lookup.
+# Commands that require a valid token before they're allowed to run
+# For now everything except the purely informational 'mcips' lookup
 PROTECTED_COMMANDS = {name for name in COMMANDS if name != 'mcips'}
 
-TRUSTED_NETWORKS = [ipaddress.ip_network('100.100.0.0/16')]
-
+TRUSTED_NETWORKS = [ipaddress.ip_network('100.100.0.0/16')] # My custrom ip range, use 100.64.0.0/24 or smth igf you have the default ts ip range
 
 def _request_is_trusted():
     if not TRUSTED_NETWORKS:
@@ -109,7 +108,6 @@ def _issue_token():
     with _tokens_lock:
         _valid_tokens[token] = time.time() + TOKEN_TTL_SECONDS
     return token
-
 
 def _token_is_valid(token):
     if not token:
