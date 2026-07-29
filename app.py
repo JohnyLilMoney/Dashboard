@@ -17,6 +17,9 @@ import random
 import secrets
 import ipaddress
 from werkzeug.security import check_password_hash
+
+app = Flask(__name__, static_folder='static', template_folder='templates')
+
 from werkzeug.middleware.proxy_fix import ProxyFix
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
@@ -25,8 +28,6 @@ START_TIMEOUT = 120
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
-
-app = Flask(__name__, static_folder='static', template_folder='templates')
 
 OLLAMA_HOST = "http://100.100.1.1:11434"
 
