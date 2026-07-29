@@ -120,6 +120,30 @@ def _token_is_valid(token):
             return False
         return True
 
+def get_tailscale_identity(ip):
+    try:
+        result = subprocess.run(
+            ["tailscale", "whois", "--json", ip],
+            capture_output=True, text=True, timeout=2, check=True
+        )
+        data = json.loads(result.stdout)
+        return data.get("UserProfile", {}).get("DisplayName")
+    except Exception:
+        return None
+
+
+def get_tailscale_user_for_request():
+    if not _request_is_trusted():
+        return None
+    return get_tailscale_identity(request.remote_addr)
+
+HEADER_PREFIXES = ["Fakka", "Ewa", "Yo"]
+
+def build_header():
+    name = get_tailscale_user_for_request()
+    if not name:
+        return "Servers"
+    return f"{random.choice(HEADER_PREFIXES)}, {name}"
 
 @app.route('/api/authenticate', methods=['POST'])
 def authenticate():
@@ -193,6 +217,10 @@ def background_pack(pack_name):
         animation_pack = None
     
     return render_template('index.html', animation_pack=animation_pack)
+
+@app.route('/api/header')
+def api_header():
+    return jsonify({'header': build_header()})
 
 @app.route('/api/run/<name>', methods=['POST'])
 def run_command(name):
