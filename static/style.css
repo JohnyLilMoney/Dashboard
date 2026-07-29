@@ -76,6 +76,18 @@ body {
     color: var(--text);
 }
 
+.header h1::after {
+    content: '_';
+    display: inline-block;
+    margin-left: 2px;
+    animation: blink-cursor 1s step-end infinite;
+}
+
+@keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
 .server-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
