@@ -17,6 +17,8 @@ import random
 import secrets
 import ipaddress
 from werkzeug.security import check_password_hash
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 TEST = 445
 START_TIMEOUT = 120
