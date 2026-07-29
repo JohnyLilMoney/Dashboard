@@ -151,7 +151,7 @@ async function sendCommand(command) {
             }
             const data = await res.json();
             if (typeof data.ok === 'string') {
-                typeIn(header, data.ok);
+                showToast(header, data.ok);
             } else {
                 alert(`Unexpected response shape: ${JSON.stringify(data)}`);
             }
@@ -378,7 +378,7 @@ function showToast(message, onClick = null, showReload = false) {
         toast.classList.remove('clickable');
         toast._onClick = null;
         reloadBtn.style.display = 'none';
-    }, 3000);
+    }, 5000);
 }
 
 function confirmWebsiteNav(url) {
