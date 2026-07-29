@@ -137,6 +137,7 @@ async function sendCommand(command) {
         }
         return;
     }
+
     const isDestructive = command.includes('shutdown') || command.includes('reboot');
     const serverName = command.startsWith('ai') ? 'AI Server' : 'Minecraft Server';
     if (isDestructive) {
@@ -145,8 +146,9 @@ async function sendCommand(command) {
         }
     }
 
-const doRequest = async (token) => {
-        const headers = token ? { 'X-Auth-Token': token } : {};
+    const tryRequest = async (token) => {
+        const headers = {};
+        if (token) headers['X-Auth-Token'] = token;
         const res = await fetch(`/api/run/${command}`, {
             method: 'POST',
             headers
@@ -158,40 +160,33 @@ const doRequest = async (token) => {
         return { needAuth: false, data };
     };
 
-    let result = await doRequest(null);
+    let result = await tryRequest(null);
+
     if (result.needAuth) {
         try {
             const token = await ensureAuthToken();
-            result = await doRequest(token);
-        } catch {
+            result = await tryRequest(token);
+        } catch (err) {
             return;
         }
     }
 
-    // handle result.data …
-}
+    if (result.needAuth || !result.data) {
+        showToast('Authentication failed.');
+        return;
+    }
 
-showToast(`Sending "${command}" to ${serverName}...`);
-    try {
-        const res = await fetch(`/api/run/${command}`, {
-            method: 'POST',
-            headers: { 'X-Auth-Token': authToken }
-        });
+    const data = result.data;
 
-        if (res.status === 401) {
-            authToken = null; // token got rejected/expired, force a fresh login next time
-            showToast('Session expired, please try again');
-            return;
-        }
+    if (data.error) {
+        showToast('Command failed or server unreachable');
+        return;
+    }
 
-        const data = await res.json();
-        if (!data.ok) {
-            showToast('Command failed or server unreachable');
-            return;
-        }
+    if (data.ok) {
         showToast('Command sent');
-    } catch (err) {
-        showToast('Network error processing request.');
+    } else {
+        showToast('Command failed or server unreachable');
     }
 }
 
