@@ -145,13 +145,33 @@ async function sendCommand(command) {
         }
     }
 
-    try {
-        await ensureAuthToken();
-    } catch (err) {
-        return; // password prompt was cancelled
+const doRequest = async (token) => {
+        const headers = token ? { 'X-Auth-Token': token } : {};
+        const res = await fetch(`/api/run/${command}`, {
+            method: 'POST',
+            headers
+        });
+        if (res.status === 401) {
+            return { needAuth: true };
+        }
+        const data = await res.json();
+        return { needAuth: false, data };
+    };
+
+    let result = await doRequest(null);
+    if (result.needAuth) {
+        try {
+            const token = await ensureAuthToken();
+            result = await doRequest(token);
+        } catch {
+            return;
+        }
     }
 
-    showToast(`Sending "${command}" to ${serverName}...`);
+    // handle result.data …
+}
+
+showToast(`Sending "${command}" to ${serverName}...`);
     try {
         const res = await fetch(`/api/run/${command}`, {
             method: 'POST',
