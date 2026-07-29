@@ -151,7 +151,7 @@ async function sendCommand(command) {
             }
             const data = await res.json();
             if (typeof data.ok === 'string') {
-                showToast(header, data.ok);
+                showToast(data.ok);
             } else {
                 alert(`Unexpected response shape: ${JSON.stringify(data)}`);
             }
