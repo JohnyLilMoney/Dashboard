@@ -130,7 +130,7 @@ def get_tailscale_identity(ip):
             capture_output=True, text=True, timeout=2, check=True
         )
         data = json.loads(result.stdout)
-        return data.get("UserProfile", {}).get("DisplayName")
+        return data.get("UserProfile", {}).get("ComputedName")
     except Exception:
         return None
 
