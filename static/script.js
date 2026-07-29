@@ -95,14 +95,26 @@ async function ensureAuthToken() {
     return requestAuthToken();
 }
 
+function typeHeader(header, text, speed = 60) {
+    header.textContent = '';
+    let i = 0;
+    (function tick() {
+        if (i < text.length) {
+            header.textContent += text[i];
+            i++;
+            setTimeout(tick, speed);
+        }
+    })();
+}
+
 fetch('/api/header')
   .then(r => r.json())
   .then(data => {
-    document.getElementById('header').textContent = data.header;
+    typeHeader(document.getElementById('header'), data.header);
   })
   .catch(() => {
-    document.getElementById('header').textContent = 'Servers';
-});
+    typeHeader(document.getElementById('header'), 'Servers');
+  });
 
 function togglePanel(server) {
     const card = document.getElementById(`${server}-server`);
