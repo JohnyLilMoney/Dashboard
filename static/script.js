@@ -23,6 +23,8 @@ const serverState = {
     }
 };
 
+const header = document.getElementById('header');
+
 let bgPauseTimer = null; 
 window.__backgroundPaused = false; 
 
@@ -95,14 +97,23 @@ async function ensureAuthToken() {
     return requestAuthToken();
 }
 
-function typeHeader(header, text, speed = 30) {
-    header.textContent = '';
+let typeToken = 0;
+
+function typeIn(el, text, speed = 30, onDone = null) {
+    typeToken++;
+    const myToken = typeToken;
+
+    el.textContent = '';
     let i = 0;
+
     (function tick() {
+        if (myToken !== typeToken) return;
         if (i < text.length) {
-            header.textContent += text[i];
+            el.textContent += text[i];
             i++;
             setTimeout(tick, speed);
+        } else if (onDone) {
+            onDone(myToken);
         }
     })();
 }
@@ -110,10 +121,10 @@ function typeHeader(header, text, speed = 30) {
 fetch('/api/header')
   .then(r => r.json())
   .then(data => {
-    typeHeader(document.getElementById('header'), data.header);
+    typeIn(header, data.header);
   })
   .catch(() => {
-    typeHeader(document.getElementById('header'), 'Servers');
+    typeIn(header, 'Servers');
   });
 
 function togglePanel(server) {
@@ -140,7 +151,7 @@ async function sendCommand(command) {
             }
             const data = await res.json();
             if (typeof data.ok === 'string') {
-                showToast(data.ok);
+                typeIn(header, data.ok);
             } else {
                 alert(`Unexpected response shape: ${JSON.stringify(data)}`);
             }
@@ -184,21 +195,21 @@ async function sendCommand(command) {
     }
 
     if (result.needAuth || !result.data) {
-        showToast('Authentication failed.');
+        typeIn(header, 'Authentication failed.');
         return;
     }
 
     const data = result.data;
 
     if (data.error) {
-        showToast('Command failed or server unreachable');
+        typeIn(header, 'Command failed or server unreachable');
         return;
     }
 
     if (data.ok) {
-        showToast('Command sent');
+        typeIn(header, 'Command sent');
     } else {
-        showToast('Command failed or server unreachable');
+        typeIn(header, 'Command failed or server unreachable');
     }
 }
 
