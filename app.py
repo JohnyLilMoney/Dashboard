@@ -145,7 +145,7 @@ def build_header():
     name = get_tailscale_user_for_request()
     if not name:
         return "Servers"
-    return f"{random.choice(HEADER_PREFIXES)}, {name}"
+    return f"{random.choice(HEADER_PREFIXES)} {name}"
 
 @app.route('/api/authenticate', methods=['POST'])
 def authenticate():
