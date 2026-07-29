@@ -376,11 +376,14 @@ def get_server_status(ip, is_mc=False):
     if is_mc:
         mc_info = ping_minecraft(ip)
         if mc_info:
-            status_data['details']['Players Online'] = f"{mc_info['online']}/{mc_info['max']}"
-            status_data['players_list'] = mc_info['list']
-        else:
-            status_data['details']['Players Online'] = '0'
-            status_data['players_list'] = []
+  if mc_info.get('online'):
+    status_data['details']['Players Online'] = (
+        f"{mc_info['online_players']}/{mc_info['max_players']}"
+    )
+    status_data['players_list'] = mc_info['players_list']
+  else:
+    status_data['details']['Players Online'] = '0'
+    status_data['players_list'] = []
     else:
         status_data['details'] = {'Loaded Model': '--'}
         status_data['models_list'] = []
