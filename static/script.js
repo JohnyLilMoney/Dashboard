@@ -95,7 +95,6 @@ async function ensureAuthToken() {
     return requestAuthToken();
 }
 
-<script>
 fetch('/api/header')
   .then(r => r.json())
   .then(data => {
@@ -103,8 +102,7 @@ fetch('/api/header')
   })
   .catch(() => {
     document.getElementById('header').textContent = 'Servers';
-  });
-</script>
+});
 
 function togglePanel(server) {
     const card = document.getElementById(`${server}-server`);
