@@ -264,16 +264,36 @@ def ping_minecraft(ip, port=25565):
     try:
         server = JavaServer(ip, port, timeout=1)
         status = server.status(tries=1)
+
+        players = []
+
+        if status.players.sample:
+            players = [
+                {
+                    "name": p.name,
+                    "id": p.id
+                }
+                for p in status.players.sample
+            ]
+
         return {
             "online": True,
-            "players": status.players.online,
+            "online_players": status.players.online,
             "max_players": status.players.max,
+            "players_list": players,
             "latency": round(status.latency, 2),
             "version": status.version.name,
             "motd": status.description
         }
+
     except Exception as e:
-        return {"online": False, "error": str(e)}
+        return {
+            "online": False,
+            "error": str(e),
+            "online_players": 0,
+            "max_players": 0,
+            "players_list": []
+        }
 
 def _check_windows_alive(ip, port):
     try:
