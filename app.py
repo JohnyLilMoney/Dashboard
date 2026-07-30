@@ -330,38 +330,37 @@ def get_local_mail_status():
     }
 
 def get_server_status(ip, is_mc=False):
-    try:
-        output = ssh_output(ip, 'uptime')
-    except Exception:
-        output = None
-
-    if not output:
-        if not is_mc and _check_windows_alive('100.100.2.2', TEST):
-            return {
-                'status': 'unavailable',
-                'uptime': None,
-                'details': {'Loaded Model': 'Booted into Windows'},
-                'models_list': []
-            }
-
-        status_data = {
-            'status': 'offline',
-            'uptime': None,
-            'details': {}
-        }
-
+    with ThreadPoolExecutor(max_workers=2) as ex:
+        ssh_future = ex.submit(ssh_output, ip, 'uptime')
         if is_mc:
-            status_data['details']['Players Online'] = '0'
-            status_data['players_list'] = []
+            mc_future = ex.submit(ping_minecraft, ip)
         else:
-            status_data['details']['Loaded Model'] = '--'
-            status_data['models_list'] = []
+            win_future = ex.submit(_check_windows_alive, '100.100.2.2', TEST)
 
-        return status_data
+        try:
+            output = ssh_future.result()
+        except Exception:
+            output = None
 
-    output = output.strip()
+        if not output:
+            if not is_mc and win_future.result():
+                return {
+                    'status': 'unavailable',
+                    'uptime': None,
+                    'details': {'Loaded Model': 'Booted into Windows'},
+                    'models_list': []
+                }
+            status_data = {'status': 'offline', 'uptime': None, 'details': {}}
+            if is_mc:
+                status_data['details']['Players Online'] = '0'
+                status_data['players_list'] = []
+            else:
+                status_data['details']['Loaded Model'] = '--'
+                status_data['models_list'] = []
+            return status_data
 
-    status_data = {
+        output = output.strip()
+            status_data = {
         'status': 'online',
         'uptime': '--',
         'details': {}
@@ -395,26 +394,21 @@ def get_server_status(ip, is_mc=False):
                         f"{days}{hour_match.group(1)}h"
                     )
 
-    if is_mc:
-        mc_info = ping_minecraft(ip)
-
-        if mc_info.get('online'):
-            status_data['details']['Players Online'] = (
-                f"{mc_info.get('online_players', 0)}/"
-                f"{mc_info.get('max_players', 0)}"
-            )
-            status_data['players_list'] = mc_info.get('players_list', [])
+        if is_mc:
+            mc_info = mc_future.result()
+            if mc_info.get('online'):
+                status_data['details']['Players Online'] = (
+                    f"{mc_info.get('online_players', 0)}/{mc_info.get('max_players', 0)}"
+                )
+                status_data['players_list'] = mc_info.get('players_list', [])
+            else:
+                status_data['details']['Players Online'] = '0'
+                status_data['players_list'] = []
         else:
-            status_data['details']['Players Online'] = '0'
-            status_data['players_list'] = []
+            status_data['details'] = {'Loaded Model': '--'}
+            status_data['models_list'] = []
 
-    else:
-        status_data['details'] = {
-            'Loaded Model': '--'
-        }
-        status_data['models_list'] = []
-
-    return status_data
+        return status_data
 
 def get_display_status(name, ip, is_mc):
     """Wraps get_server_status with the shared 'starting' overlay."""
