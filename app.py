@@ -360,11 +360,11 @@ def get_server_status(ip, is_mc=False):
             return status_data
 
         output = output.strip()
-            status_data = {
-        'status': 'online',
-        'uptime': '--',
-        'details': {}
-    }
+        status_data = {
+            'status': 'online',
+            'uptime': '--',
+            'details': {}
+        }
 
     if 'up ' in output:
         parts = output.split('up ')
