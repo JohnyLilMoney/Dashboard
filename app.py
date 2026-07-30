@@ -232,11 +232,16 @@ def run_command(name):
 
     try:
         result = COMMANDS[name]()
-        if name in START_COMMANDS:
-            mark_start_pending(START_COMMANDS[name])
-        return {'ok': result}
     except Exception as e:
         return {'error': str(e)}, 500
+
+    if not result:
+        return {'error': 'command failed'}, 500
+
+    if name in START_COMMANDS:
+        mark_start_pending(START_COMMANDS[name])
+
+    return {'ok': result}
 
 @app.route('/api/ollama/ps')
 def ollama_ps():
