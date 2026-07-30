@@ -60,14 +60,12 @@ TOKEN_TTL_SECONDS = 43200  # tokens are valid for 12h, then need a re-login
 MAX_LOGIN_ATTEMPTS = 5
 LOCKOUT_SECONDS = 60
 
-_valid_tokens = {}       # token -> expiry timestamp
+_valid_tokens = {}
 _tokens_lock = threading.Lock()
 
 _failed_attempts = {}    # ip -> (fail_count, locked_until_timestamp)
 _attempts_lock = threading.Lock()
 
-# Commands that require a valid token before they're allowed to run
-# For now everything except the purely informational 'mcips' lookup
 PROTECTED_COMMANDS = {name for name in COMMANDS if name != 'mcips'}
 
 TRUSTED_NETWORKS = [ipaddress.ip_network('100.100.0.0/16')] # My custrom ip range, use 100.64.0.0/24 or smth igf you have the default ts ip range
@@ -441,9 +439,11 @@ IDLE_TIMEOUT = 15
 
 _cache_updated_at = 0.0
 
+_shutdown = threading.Event()
+
 def _status_loop():
     global _cache_updated_at
-    while True:
+    while not _shutdown.is_set():
         with _seen_lock:
             idle = time.time() - _last_client_seen > IDLE_TIMEOUT
         if not idle:
@@ -451,7 +451,7 @@ def _status_loop():
             with _cache_lock:
                 _status_cache.update(fresh)
                 _cache_updated_at = time.time()
-        time.sleep(POLL_INTERVAL)
+        _shutdown.wait(POLL_INTERVAL)
 
 def _do_status_check():
     servers = {'ai': ('100.100.1.1', False), 'mc': ('100.100.1.2', True)}
