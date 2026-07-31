@@ -8,19 +8,24 @@ def ssh_command(host, command):
         return False
 
 def ssh_output(host, command):
+    cmd = [
+        'ssh', '-i', '/home/johny/.ssh/webdash',
+        '-o', 'ConnectTimeout=1',
+        '-o', 'BatchMode=yes',
+        '-o', 'StrictHostKeyChecking=no',
+        f'remoteadmin@{host}', command
+    ]
+    
     try:
-        result = subprocess.run(
-            ['ssh', '-i', '/home/johny/.ssh/webdash',
-                   '-o', 'ConnectTimeout=1',
-                   '-o', 'BatchMode=yes',
-                   '-o', 'StrictHostKeyChecking=no',
-                   f'remoteadmin@{host}', command],
-            capture_output=True,
-            text=True,
-            timeout=1
-        )
-        if result.returncode == 0:
-            return result.stdout
-        return None
-    except subprocess.TimeoutExpired:
+        with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as proc:
+            try:
+                stdout, _ = proc.communicate(timeout=1.1)
+                if proc.returncode == 0:
+                    return stdout
+                return None
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.communicate() 
+                return None
+    except Exception:
         return None
