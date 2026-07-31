@@ -1,16 +1,8 @@
 import subprocess
 
-def ssh_command(host, command, timeout=1):
+def ssh_command(host, command):
     try:
-        result = subprocess.run(
-            ['ssh', '-i', '/home/johny/.ssh/webdash',
-                   '-o', 'ConnectTimeout=1',
-                   '-o', 'BatchMode=yes',
-                   '-o', 'StrictHostKeyChecking=no',
-                   f'remoteadmin@{host}', command],
-            capture_output=True,
-            timeout=timeout
-        )
+        result = subprocess.run([...], capture_output=True, timeout=1)
         return result.returncode == 0
     except subprocess.TimeoutExpired:
         return False
