@@ -100,12 +100,12 @@ def get_router_status():
         return {
             'status': 'online',
             'uptime': '--',
-            'details': {'Next IP Change': '--'}
+            'details': {'Expected IP Refresh': '--'}
         }
     return {
         'status': 'online',
         'uptime': _format_duration(cache['uptime_seconds']),
-        'details': {'Next IP Change': _format_duration(cache['next_reset_in'])}
+        'details': {'Expected IP Refresh': _format_duration(cache['next_reset_in'])}
     }
 
 threading.Thread(target=_router_poll_loop, daemon=True).start()
