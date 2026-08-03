@@ -532,7 +532,7 @@ def _status_loop():
 
 def _do_status_check():
     servers = {'ai': ('100.100.1.1', False), 'mc': ('100.100.1.2', True)}
-    result = {'mail': get_local_mail_status()}
+    result = {'mail': get_local_mail_status(), 'router': get_router_status()}
     with ThreadPoolExecutor(max_workers=len(servers)) as executor:
         futures = {name: executor.submit(get_display_status, name, ip, is_mc)
                    for name, (ip, is_mc) in servers.items()}
