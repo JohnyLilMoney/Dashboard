@@ -21,11 +21,11 @@ const serverState = {
         uptime: null,
         details: {}
     },
-	router: {
+    router: {
         status: 'offline',
         uptime: null,
         details: {
-            'Next IP Change': '--',
+            'Expected IP Refresh': '--',
         }
     }
 
@@ -337,25 +337,30 @@ function updateAllUI() {
             uptimeEl.textContent = state.uptime || '--';
         }
 
-        if (state.details && detailsTable) {
-            const rows = detailsTable.querySelectorAll('tr');
-            let i = 0;
-            for (const [label, value] of Object.entries(state.details)) {
-                if (rows[i]) {
-                    const isPlayersRow = (server === 'mc' && label === 'Players Online');
-                    const isModelsRow = (server === 'ai' && label === 'Loaded Model');
-                    if (isPlayersRow) {
-                        updatePlayers(server, state);
-                    } else if (isModelsRow) {
-			//do nothing for now
-                    } else {
-                        rows[i].children[0].textContent = label;
-                        rows[i].children[1].textContent = value;
-                    }
-                }
-                i++;
+if (state.details && detailsTable) {
+    const rows = detailsTable.querySelectorAll('tr');
+    let i = 0;
+    for (const [label, value] of Object.entries(state.details)) {
+        if (rows[i]) {
+            const isPlayersRow = (server === 'mc' && label === 'Players Online');
+            const isModelsRow = (server === 'ai' && label === 'Loaded Model');
+            const isRouterIPRow = (server === 'router' && label === 'Expected IP Refresh');  // <-- NEW
+
+            if (isPlayersRow) {
+                updatePlayers(server, state);
+            } else if (isModelsRow) {
+                // do nothing for now (handled by updateModels)
+            } else if (isRouterIPRow) {
+                const valueSpan = document.getElementById('router-next-ip-change');
+                if (valueSpan) valueSpan.textContent = value;
+            } else {
+                rows[i].children[0].textContent = label;
+                rows[i].children[1].textContent = value;
             }
         }
+        i++;
+    }
+}
     }
 }
 
