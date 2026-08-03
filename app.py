@@ -25,6 +25,11 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+AMS_TZ = ZoneInfo("Europe/Amsterdam")
+
 TEST = 445
 START_TIMEOUT = 120
 
@@ -88,16 +93,17 @@ def _router_poll_loop():
         uptime = _fetch_zyxel_uptime()
         if uptime is not None:
             next_reset_in = 86400 - (uptime % 86400)
+            reset_time = datetime.now(AMS_TZ) + timedelta(seconds=next_reset_in)
             with _router_lock:
                 _router_cache['uptime_seconds'] = uptime
-                _router_cache['next_reset_in'] = next_reset_in
+                _router_cache['reset_time'] = reset_time
                 _router_cache['updated_at'] = time.time()
         _shutdown.wait(ZYXEL_POLL_INTERVAL)
-
+        
 def get_router_status():
     with _router_lock:
         cache = dict(_router_cache)
-    if cache['uptime_seconds'] is None:
+    if cache.get('reset_time') is None:
         return {
             'status': 'online',
             'uptime': '--',
@@ -106,7 +112,7 @@ def get_router_status():
     return {
         'status': 'online',
         'uptime': _format_duration(cache['uptime_seconds']),
-        'details': {'Expected IP Refresh': _format_duration(cache['next_reset_in'])}
+        'details': {'Expected IP Refresh': cache['reset_time'].strftime('%H:%M')}
     }
 
 threading.Thread(target=_router_poll_loop, daemon=True).start()
