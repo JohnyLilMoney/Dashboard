@@ -20,7 +20,15 @@ const serverState = {
         status: 'offline',
         uptime: null,
         details: {}
+    },
+	router: {
+        status: 'offline',
+        uptime: null,
+        details: {
+            'Next IP Change': '--',
+        }
     }
+
 };
 
 const header = document.getElementById('header');
@@ -455,6 +463,13 @@ async function fetchStatus() {
         if (data.mail) {
             serverState.mail.status = data.mail.status;
             serverState.mail.uptime = data.mail.uptime;
+        }
+        if (data.router) {
+            serverState.router.status = data.router.status;
+            serverState.router.uptime = data.router.uptime;
+            if (data.router.details) {
+                serverState.router.details = data.router.details;
+            }
         }
 
         updateAllUI();
