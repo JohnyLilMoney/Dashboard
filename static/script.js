@@ -150,7 +150,7 @@ function togglePanel(server) {
 }
 
 async function sendCommand(command) {
-    if (command === 'mcips') {
+    if (command === 'mcips' || command === 'whatsthis') {
         try {
             const res = await fetch(`/api/run/${command}`, { method: 'POST' });
             if (!res.ok) {
@@ -163,7 +163,7 @@ async function sendCommand(command) {
             } else {
                 alert(`Unexpected response shape: ${JSON.stringify(data)}`);
             }
-        } catch (err) {
+    }     catch (err) {
             alert(`JS Error: ${err.message}`);
         }
         return;
