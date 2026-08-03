@@ -117,31 +117,40 @@
                 </div>
             </div>
         </div>
-		<div class="server-card" id="router-server">
-    <div class="card-top">
-        <h2>Router</h2>
-        <span class="status-badge offline" id="router-status-badge">
-            <span class="status-dot"></span> Offline
-        </span>
-    </div>
-    <button class="expand-toggle" onclick="togglePanel('router')" id="router-toggle">
-        <span class="toggle-label">Details</span>
-        <span class="toggle-arrow" id="router-arrow">▸</span>
-    </button>
-<table class="details-table" id="router-details">
-    <tr>
-        <td class="hidden-label">Next IP Change</td>
-        <td class="full-width-cell">
-            <div class="models-section">
-                <div class="models-header">
-                    <span class="models-label">Next IP Change:</span>
-                    <span class="model-name" id="router-next-ip-change">--</span>
+        <div class="server-card" id="router-server">
+            <div class="card-top">
+                <h2>Router</h2>
+                <span class="status-badge offline" id="router-status-badge">
+                    <span class="status-dot"></span> Offline
+                </span>
+            </div>
+            <button class="expand-toggle" onclick="togglePanel('router')" id="router-toggle">
+                <span class="toggle-label">Details</span>
+                <span class="toggle-arrow" id="router-arrow">▸</span>
+            </button>
+            <div class="expanded-panel" id="router-panel">
+                <div class="panel-section">
+                    <span class="section-label">Uptime</span>
+                    <span class="uptime-value" id="router-uptime">--</span>
+                </div>
+                <div class="panel-section">
+                    <span class="section-label">Info</span>
+                    <table class="details-table" id="router-details">
+                        <tr>
+                            <td class="hidden-label">Next IP Change</td>
+                            <td class="full-width-cell">
+                                <div class="models-section">
+                                    <div class="models-header">
+                                        <span class="models-label">Next IP Change:</span>
+                                        <span class="model-name" id="router-next-ip-change">--</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </div>
-        </td>
-    </tr>
-</table>
-		</div>
+        </div>
     </div>
     {% if animation_pack and animation_pack != 'None' %}
         <div class="info-badge" id="infoBadge" onclick="showBackgroundInfo()">
