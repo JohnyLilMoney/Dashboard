@@ -132,24 +132,24 @@ COMMANDS = {
     'mcshutdown': lambda: ssh_command('100.100.1.2', 'sudo shutdown -h now'),
     'ai':         lambda: wol('04:7c:16:d7:3c:bf'),
     'mc':         lambda: wol('ec:b1:d7:3e:44:45'),
-    'mcips':      lambda: "Default: johnylilmoney.nl | TailScale: ts.johnylilmoney.nl | ZeroTier: zt.johnylilmoney.nl"
+    'mcips':      lambda: "Default: johnylilmoney.nl | TailScale: ts.johnylilmoney.nl | ZeroTier: zt.johnylilmoney.nl",
+    'whatsthis':  lambda: "Odido Klik en Klaar comes with a dynamic ip. This means that the ip changes whenever the router starts, and every 24h after that. When this happens, people not using tailscale/zerotier won't be able to connect to the website for 0-2 minutes, and mc players will be kicked. The expected refresh is only the next one if the router doesn't lose power until then."
 }
 
 START_COMMANDS = {'ai': 'ai', 'mc': 'mc', 'aireboot': 'ai', 'mcreboot': 'mc'}
+PROTECTED_COMMANDS = {name for name in COMMANDS if name not in ('mcips', 'whatsthis')}
 
 PASSWORD_HASH = os.environ.get('DASHBOARD_PASSWORD_HASH')
 
-TOKEN_TTL_SECONDS = 43200  # tokens are valid for 12h, then need a re-login
+TOKEN_TTL_SECONDS = 43200
 MAX_LOGIN_ATTEMPTS = 5
 LOCKOUT_SECONDS = 60
 
 _valid_tokens = {}
 _tokens_lock = threading.Lock()
 
-_failed_attempts = {}    # ip -> (fail_count, locked_until_timestamp)
+_failed_attempts = {}
 _attempts_lock = threading.Lock()
-
-PROTECTED_COMMANDS = {name for name in COMMANDS if name != 'mcips'}
 
 TRUSTED_NETWORKS = [ipaddress.ip_network('100.100.0.0/16')] # My custrom ip range, use 100.64.0.0/24 or smth igf you have the default ts ip range
 
