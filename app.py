@@ -22,6 +22,8 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 
 from werkzeug.middleware.proxy_fix import ProxyFix
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 TEST = 445
 START_TIMEOUT = 120
@@ -31,8 +33,78 @@ log.setLevel(logging.ERROR)
 
 OLLAMA_HOST = "http://100.100.1.1:11434"
 
+ZYXEL_HOST = "https://192.168.1.1"
+ZYXEL_ACCOUNT = "admin"
+ZYXEL_PASSWORD_B64 = os.environ.get('ZYXEL_PASSWORD_B64')
+ZYXEL_POLL_INTERVAL = 1800
+
 _pending_starts = {}
 _pending_lock = threading.Lock()
+
+_router_cache = {'uptime_seconds': None, 'next_reset_in': None, 'updated_at': 0}
+_router_lock = threading.Lock()
+
+def _fetch_zyxel_uptime():
+    if not ZYXEL_PASSWORD_B64:
+        return None
+    try:
+        s = requests.Session()
+        s.verify = False
+        s.get(f"{ZYXEL_HOST}/getRSAPublickKey", timeout=5)
+        login_payload = {
+            "Input_Account": ZYXEL_ACCOUNT,
+            "Input_Passwd": ZYXEL_PASSWORD_B64,
+            "currLang": "nl",
+            "RememberPassword": 0,
+            "SHA512_password": False
+        }
+        login_resp = s.post(
+            f"{ZYXEL_HOST}/UserLogin",
+            json=login_payload,
+            timeout=5
+        )
+        if login_resp.json().get('result') != 'ZCFG_SUCCESS':
+            return None
+
+        status_resp = s.get(f"{ZYXEL_HOST}/cgi-bin/DAL?oid=status", timeout=5)
+        data = status_resp.json()
+        return data['Object'][0]['DeviceInfo']['UpTime']
+    except Exception:
+        return None
+
+def _format_duration(seconds):
+    days = seconds // 86400
+    hours = (seconds % 86400) // 3600
+    minutes = (seconds % 3600) // 60
+    parts = []
+    if days: parts.append(f"{days}d")
+    if hours: parts.append(f"{hours}h")
+    if minutes or not parts: parts.append(f"{minutes}m")
+    return ' '.join(parts)
+
+def _router_poll_loop():
+    while not _shutdown.is_set():
+        uptime = _fetch_zyxel_uptime()
+        if uptime is not None:
+            next_reset_in = 86400 - (uptime % 86400)
+            with _router_lock:
+                _router_cache['uptime_seconds'] = uptime
+                _router_cache['next_reset_in'] = next_reset_in
+                _router_cache['updated_at'] = time.time()
+        _shutdown.wait(ZYXEL_POLL_INTERVAL)
+
+def get_router_status():
+    with _router_lock:
+        cache = dict(_router_cache)
+    if cache['uptime_seconds'] is None:
+        return {'uptime': '--', 'next_reset_in': '--'}
+    return {
+        'uptime': _format_duration(cache['uptime_seconds']),
+        'next_reset_in': _format_duration(cache['next_reset_in']),
+        'last_checked': int(cache['updated_at'])
+    }
+
+threading.Thread(target=_router_poll_loop, daemon=True).start()
 
 def mark_start_pending(name):
     with _pending_lock:
