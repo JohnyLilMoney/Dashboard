@@ -43,6 +43,7 @@ _pending_lock = threading.Lock()
 
 _router_cache = {'uptime_seconds': None, 'next_reset_in': None, 'updated_at': 0}
 _router_lock = threading.Lock()
+threading.Thread(target=_router_poll_loop, daemon=True).start()
 
 def _fetch_zyxel_uptime():
     if not ZYXEL_PASSWORD_B64:
@@ -107,8 +108,6 @@ def get_router_status():
         'uptime': _format_duration(cache['uptime_seconds']),
         'details': {'Expected IP Refresh': _format_duration(cache['next_reset_in'])}
     }
-
-threading.Thread(target=_router_poll_loop, daemon=True).start()
 
 def mark_start_pending(name):
     with _pending_lock:
