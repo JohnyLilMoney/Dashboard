@@ -97,11 +97,15 @@ def get_router_status():
     with _router_lock:
         cache = dict(_router_cache)
     if cache['uptime_seconds'] is None:
-        return {'uptime': '--', 'next_reset_in': '--'}
+        return {
+            'status': 'online',
+            'uptime': '--',
+            'details': {'Next IP Change': '--'}
+        }
     return {
+        'status': 'online',
         'uptime': _format_duration(cache['uptime_seconds']),
-        'next_reset_in': _format_duration(cache['next_reset_in']),
-        'last_checked': int(cache['updated_at'])
+        'details': {'Next IP Change': _format_duration(cache['next_reset_in'])}
     }
 
 threading.Thread(target=_router_poll_loop, daemon=True).start()
