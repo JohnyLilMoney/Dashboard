@@ -676,6 +676,30 @@ body {
     justify-content: center;
 }
 
+.toast-close-btn {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #2d3143;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.toast-close-btn:hover {
+    color: var(--text);
+    border-color: var(--accent);
+}
+
 .toast-container {
     position: fixed;
     bottom: 24px;

@@ -374,10 +374,11 @@ function reloadDifferentBg() {
     }
 }
 
-function showToast(message, onClick = null, showReload = false) {
+function showToast(message, onClick = null, showReload = false, timeout = 3000) {
     const toast = document.getElementById('toast');
     const msgSpan = document.getElementById('toast-message');
     const reloadBtn = document.getElementById('toast-reload-btn');
+    const closeBtn = document.getElementById('toast-close-btn');
 
     msgSpan.textContent = message;
     reloadBtn.style.display = showReload ? 'inline-flex' : 'none';
@@ -386,12 +387,26 @@ function showToast(message, onClick = null, showReload = false) {
 
     toast.classList.add('show');
     clearTimeout(toast._timeout);
-    toast._timeout = setTimeout(() => {
-        toast.classList.remove('show');
-        toast.classList.remove('clickable');
-        toast._onClick = null;
-        reloadBtn.style.display = 'none';
-    }, 5000);
+
+    const persistent = timeout <= 0;
+    closeBtn.style.display = persistent ? 'flex' : 'none';
+
+    if (!persistent) {
+        toast._timeout = setTimeout(hideToast, timeout);
+    }
+}
+
+function hideToast() {
+    const toast = document.getElementById('toast');
+    const reloadBtn = document.getElementById('toast-reload-btn');
+    const closeBtn = document.getElementById('toast-close-btn');
+
+    toast.classList.remove('show');
+    toast.classList.remove('clickable');
+    toast._onClick = null;
+    clearTimeout(toast._timeout);
+    reloadBtn.style.display = 'none';
+    closeBtn.style.display = 'none';
 }
 
 function confirmWebsiteNav(url) {
