@@ -686,7 +686,7 @@ body {
     border-radius: 50%;
     background: #2d3143;
     border: 1px solid var(--border);
-    color: var(--text-secondary);
+    color: var(--text);
     font-size: 12px;
     line-height: 1;
     align-items: center;
