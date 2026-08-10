@@ -430,6 +430,11 @@ document.getElementById('toast').addEventListener('click', () => {
     }
 });
 
+document.getElementById('toast-close-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    hideToast();
+});
+
 function hideUI() {
     uiHidden = true;
     document.body.classList.add('ui-hidden');
