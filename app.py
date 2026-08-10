@@ -1,3 +1,6 @@
+from gevent import monkey
+monkey.patch_all()
+
 from dotenv import load_dotenv
 load_dotenv('/home/johny/dashboard/.env')
 from ssh_utils import ssh_command, ssh_output
