@@ -676,6 +676,14 @@ body {
     justify-content: center;
 }
 
+#toast-like-btn:hover {
+    color: #22c55e;
+}
+
+#toast-dislike-btn:hover {
+    color: #ef4444;
+}
+
 .toast-close-btn {
     display: none;
     position: absolute;
