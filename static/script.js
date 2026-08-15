@@ -453,6 +453,8 @@ function hideUI() {
 
     const toast = document.getElementById('toast');
     const reloadBtn = document.getElementById('toast-reload-btn');
+    const likeBtn = document.getElementById('toast-like-btn');
+    const dislikeBtn = document.getElementById('toast-dislike-btn');
 
     toast.classList.remove('show');
     toast.classList.remove('clickable');
@@ -460,6 +462,8 @@ function hideUI() {
     clearTimeout(toast._timeout);
 
     reloadBtn.style.display = 'none';
+    likeBtn.style.display = 'none';
+    dislikeBtn.style.display = 'none';
 }
 
 function showUI() {
