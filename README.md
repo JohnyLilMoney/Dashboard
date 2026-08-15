@@ -1,3 +1,4 @@
+View the tool yourself on ```johnylilmoney.nl```.
 # Booting my servers remotely
 Keeping my servers running is a waste of power, but if I need them while I am away (or friends do) having a family member go and press a button is far from an ideal solution. This runs on a smaller server of about 6 watts instead, and gives detailed info + controls.
 ### Uses wol for boot and ssh for reboot, poweroff and status: uptime + offline/online/starting/unavailable (for dual boot systems that are booted into the other os).
