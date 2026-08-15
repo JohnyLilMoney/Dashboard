@@ -412,6 +412,8 @@ function hideToast() {
     const toast = document.getElementById('toast');
     const reloadBtn = document.getElementById('toast-reload-btn');
     const closeBtn = document.getElementById('toast-close-btn');
+    const likeBtn = document.getElementById('toast-like-btn');
+    const dislikeBtn = document.getElementById('toast-dislike-btn');
 
     toast.classList.remove('show');
     toast.classList.remove('clickable');
@@ -419,6 +421,8 @@ function hideToast() {
     clearTimeout(toast._timeout);
     reloadBtn.style.display = 'none';
     closeBtn.style.display = 'none';
+    likeBtn.style.display = 'none';
+    dislikeBtn.style.display = 'none';
 }
 
 function confirmWebsiteNav(url) {
