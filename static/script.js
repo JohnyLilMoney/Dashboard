@@ -33,7 +33,12 @@ const serverState = {
 
 const header = document.getElementById('header');
 
-isTailScale = await fetch('/api/is_tailscale').then(r => r.json()).then(data => data.trusted).catch(() => false);
+let isTailScale = false;
+
+fetch('/api/is_tailscale')
+  .then(r => r.json())
+  .then(data => { isTailScale = data.trusted; })
+  .catch(() => { isTailScale = false; });
 
 let bgPauseTimer = null; 
 window.__backgroundPaused = false; 
