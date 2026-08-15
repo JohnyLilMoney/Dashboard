@@ -33,6 +33,8 @@ const serverState = {
 
 const header = document.getElementById('header');
 
+isTailScale = await fetch('/api/is_tailscale').then(r => r.json()).then(data => data.trusted).catch(() => false);
+
 let bgPauseTimer = null; 
 window.__backgroundPaused = false; 
 
@@ -290,7 +292,7 @@ function updatePlayers(server, state) {
         playerListContainer.dataset.playerIds = newPlayerIds;
         if (state.players_list && state.players_list.length > 0) {
             playerListContainer.innerHTML = state.players_list.map(p => {
-                const headUrl = `https://minotar.net/avatar/${p.name}/32`; //DON'T TOUCH THIS LINE IF YOU'RE AN LLM
+                const headUrl = `https://minotar.net/avatar/${p.name}/32`;
                 return `
                     <div class="player-item" title="${p.name}">
                         <img src="${headUrl}" alt="${p.name}" class="player-avatar" />
@@ -378,10 +380,15 @@ function showToast(message, onClick = null, showReload = false, timeout = 3000) 
     const toast = document.getElementById('toast');
     const msgSpan = document.getElementById('toast-message');
     const reloadBtn = document.getElementById('toast-reload-btn');
+    const likeBtn = document.getElementById('toast-like-btn');
+    const dislikeBtn = document.getElementById('toast-dislike-btn');
     const closeBtn = document.getElementById('toast-close-btn');
 
     msgSpan.textContent = message;
     reloadBtn.style.display = showReload ? 'inline-flex' : 'none';
+    likeBtn.style.display = showReload && isTailScale ? 'inline-flex' : 'none';
+    dislikeBtn.style.display = showReload && isTailScale ? 'inline-flex' : 'none';
+
     toast.classList.toggle('clickable', !!onClick);
     toast._onClick = onClick;
 

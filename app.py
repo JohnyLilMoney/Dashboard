@@ -151,7 +151,7 @@ _tokens_lock = threading.Lock()
 _failed_attempts = {}
 _attempts_lock = threading.Lock()
 
-TRUSTED_NETWORKS = [ipaddress.ip_network('100.100.0.0/16')] # My custrom ip range, use 100.64.0.0/24 or smth igf you have the default ts ip range
+TRUSTED_NETWORKS = [ipaddress.ip_network('100.100.0.0/16')] # My custrom ip range, use 100.64.0.0/24 or smth if you have the default ts ip range
 
 def _request_is_trusted():
     if not TRUSTED_NETWORKS:
@@ -162,6 +162,9 @@ def _request_is_trusted():
         return False
     return any(addr in net for net in TRUSTED_NETWORKS)
 
+@app.route('/api/is_tailscale')
+def is_tailscale():
+    return jsonify({'trusted': _request_is_trusted()})
 
 def _is_locked_out(ip):
     with _attempts_lock:
