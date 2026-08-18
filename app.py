@@ -310,6 +310,8 @@ def get_available_backgrounds(exclude=None):
         for i in range(votes):
             packs2.append(background)
     if packs2:
+        if exclude:
+            packs2 = [p for p in packs2 if p != exclude]
         return packs2
     else:
         return packs
