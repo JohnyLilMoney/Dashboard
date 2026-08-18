@@ -393,6 +393,18 @@ function likeCurrentBg() {
     }
 }
 
+function dislikeCurrentBg() {
+    const badge = document.getElementById('infoBadge');
+
+    const backgroundName = badge ? badge.dataset.background : null;
+
+    if (backgroundName) {
+        fetch(`/api/dislike_background?background=${encodeURIComponent(backgroundName)}`);
+    } else {
+        console.error("Could not find the current background name on the badge element.");
+    }
+}
+
 function showToast(message, onClick = null, showReload = false, timeout = 3000) {
     const toast = document.getElementById('toast');
     const msgSpan = document.getElementById('toast-message');
