@@ -4,6 +4,7 @@ import sqlite3
 
 from app import DB_PATH
 BG_PATH = os.path.join(os.path.dirname(__file__), 'static', 'backgrounds')
+DB_PATH = "votes.db"
 
 def get_db():
     if 'db' not in g:

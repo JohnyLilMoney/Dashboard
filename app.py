@@ -2,9 +2,7 @@ import sqlite3
 from dotenv import load_dotenv
 load_dotenv('/home/johny/dashboard/.env')
 from ssh import ssh_command, ssh_output
-from db import close_db, init_db, query_db, update_db, get_background_scores, modify_db
-
-DB_PATH = "votes.db"
+from db import close_db, init_db, query_db, update_db, get_background_scores, modify_db, DB_PATH
 
 if not os.path.exists(DB_PATH):
     print(f"Database file '{DB_PATH}' not found. Initializing...")
