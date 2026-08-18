@@ -406,6 +406,7 @@ function dislikeCurrentBg() {
 }
 
 function showToast(message, onClick = null, showReload = false, timeout = 3000) {
+    const container = document.querySelector('.toast-container'); // Get parent wrapper
     const toast = document.getElementById('toast');
     const msgSpan = document.getElementById('toast-message');
     const reloadBtn = document.getElementById('toast-reload-btn');
@@ -414,6 +415,7 @@ function showToast(message, onClick = null, showReload = false, timeout = 3000) 
     const closeBtn = document.getElementById('toast-close-btn');
 
     msgSpan.textContent = message;
+    
     reloadBtn.style.display = showReload ? 'inline-flex' : 'none';
     likeBtn.style.display = showReload && isTailScale ? 'inline-flex' : 'none';
     dislikeBtn.style.display = showReload && isTailScale ? 'inline-flex' : 'none';
@@ -421,6 +423,7 @@ function showToast(message, onClick = null, showReload = false, timeout = 3000) 
     toast.classList.toggle('clickable', !!onClick);
     toast._onClick = onClick;
 
+    container.classList.add('show-active');
     toast.classList.add('show');
     clearTimeout(toast._timeout);
 
@@ -435,20 +438,15 @@ function showToast(message, onClick = null, showReload = false, timeout = 3000) 
 }
 
 function hideToast() {
+    const container = document.querySelector('.toast-container');
     const toast = document.getElementById('toast');
-    const reloadBtn = document.getElementById('toast-reload-btn');
-    const closeBtn = document.getElementById('toast-close-btn');
-    const likeBtn = document.getElementById('toast-like-btn');
-    const dislikeBtn = document.getElementById('toast-dislike-btn');
 
+    container.classList.remove('show-active');
     toast.classList.remove('show');
+    
     toast.classList.remove('clickable');
     toast._onClick = null;
     clearTimeout(toast._timeout);
-    reloadBtn.style.display = 'none';
-    closeBtn.style.display = 'none';
-    likeBtn.style.display = 'none';
-    dislikeBtn.style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -457,19 +455,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (container && toast) {
         container.addEventListener('mouseenter', () => {
-            if (toast.classList.contains('show')) {
+            if (container.classList.contains('show-active')) {
                 clearTimeout(toast._timeout);
             }
         });
 
         container.addEventListener('mouseleave', () => {
             const timeoutVal = toast._currentTimeoutVal;
-            if (toast.classList.contains('show') && timeoutVal > 0) {
+            if (container.classList.contains('show-active')) {
                 toast._timeout = setTimeout(hideToast, timeoutVal);
             }
         });
     }
 });
+
 
 function confirmWebsiteNav(url) {
     const proceed = window.confirm(

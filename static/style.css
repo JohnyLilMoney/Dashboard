@@ -717,6 +717,14 @@ body {
     align-items: center;
     gap: 10px;
     z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.toast-container.show-active {
+    opacity: 1;
+    visibility: visible;
 }
 
 .reload-badge svg {
