@@ -390,7 +390,7 @@ def like_background():
 @app.route('/api/dislike_background')
 def dislike_background():
     background = request.args.get('background')
-    
+
     if not _request_is_trusted():
         return jsonify({'error': 'tailscale users only'}), 403
 
@@ -408,6 +408,7 @@ def dislike_background():
             votes = int(row)
         except (ValueError, TypeError):
             return jsonify({'error': 'Score data is corrupted or not a number'}), 500
+        
     if votes > 1:
         votes -= 1
         modify_db("INSERT OR REPLACE INTO user_backgrounds (user_ip, background_name, score) VALUES (?, ?, ?)", (ip, background, votes))
