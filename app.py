@@ -1,8 +1,20 @@
 import sqlite3
 from dotenv import load_dotenv
 load_dotenv('/home/johny/dashboard/.env')
-from ssh_utils import ssh_command, ssh_output
-from flask import Flask, send_from_directory, jsonify, render_template, request
+from ssh import ssh_command, ssh_output
+from db import close_db, init_db, query_db, update_db, get_background_scores, modify_db
+
+DB_PATH = "votes.db"
+
+if not os.path.exists(DB_PATH):
+    print(f"Database file '{DB_PATH}' not found. Initializing...")
+    init_db()
+else:
+    print(f"Database file '{DB_PATH}' found.")
+
+update_db()
+
+from flask import Flask, jsonify, render_template, request
 import subprocess
 import re
 import socket
@@ -20,6 +32,7 @@ import ipaddress
 from werkzeug.security import check_password_hash
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
+app.teardown_appcontext(close_db)
 
 from werkzeug.middleware.proxy_fix import ProxyFix
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
@@ -269,25 +282,39 @@ def index():
     return render_template('index.html', animation_pack=animation_pack)
 
 def get_available_backgrounds(exclude=None):
-    """Get list of available background pack folders."""
     backgrounds_path = os.path.join(app.static_folder, 'backgrounds')
 
     if not os.path.exists(backgrounds_path):
         return []
 
-    packs = [
-        d for d in os.listdir(backgrounds_path)
-        if os.path.isdir(os.path.join(backgrounds_path, d))
-    ]
+    if not exclude:
+        packs = [
+            d for d in os.listdir(backgrounds_path)
+            if os.path.isdir(os.path.join(backgrounds_path, d))
+        ]
+    else:
+        packs = [
+            d for d in os.listdir(backgrounds_path)
+            if os.path.isdir(os.path.join(backgrounds_path, d)) and d != exclude
+        ]
 
     if exclude:
         packs = [p for p in packs if p != exclude]
 
+    if not _request_is_trusted():
+        return packs
+
+    ip = request.remote_addr
+    scores = get_background_scores(ip)
+    packs = []
+    for score in scores:
+        background, score = score
+        for i in range(score):
+            packs.append(background)
     return packs
 
 @app.route('/<pack_name>')
 def background_pack(pack_name):
-    """Load a specific background pack by name"""
     available_packs = get_available_backgrounds()
     
     if pack_name in available_packs:
@@ -330,10 +357,66 @@ def run_command(name):
 
     return {'ok': result}
 
+@app.route('/api/like_background')
+def like_background(background: str):
+    if not _request_is_trusted():
+        return jsonify({'error': 'tailscale users only'}), 403
+
+    if not background:
+        return jsonify({'error': 'bad request, no background provided'}), 401
+
+    votes: int
+    ip = request.remote_addr
+    row = query_db("SELECT score FROM user_backgrounds WHERE user_ip = ? AND background_name = ?", (ip, background), one=True)
+    if row is None:
+        modify_db("INSERT INTO users (ip) VALUES (?)", (ip,))
+        votes = 5
+    else:
+        try:
+            votes = int(row[0])
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Score data is corrupted or not a number'}), 500
+
+    if votes < 10:
+        votes += 1
+        modify_db("INSERT OR REPLACE INTO user_backgrounds (user_ip, background_name, score) VALUES (?, ?, ?)", (ip, background, votes))
+        return jsonify({'ok': True, 'new_score': votes}), 200
+    else:
+        return jsonify({'ok': False, 'new_score': votes}), 200
+    
+
+
+@app.route('/api/dislike_background')
+def dislike_background(background: str):
+    if not _request_is_trusted():
+        return jsonify({'error': 'tailscale users only'}), 403
+
+    if not background:
+        return jsonify({'error': 'bad request, no background provided'}), 401
+
+    votes: int
+    ip = request.remote_addr
+    row = query_db("SELECT score FROM user_backgrounds WHERE user_ip = ? AND background_name = ?", (ip, background), one=True)
+    if row is None:
+        modify_db("INSERT INTO users (ip) VALUES (?)", (ip,))
+        votes = 5
+    else:
+        try:
+            votes = int(row[0])
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Score data is corrupted or not a number'}), 500
+
+    if votes > 1:
+        votes -= 1
+        modify_db("INSERT OR REPLACE INTO user_backgrounds (user_ip, background_name, score) VALUES (?, ?, ?)", (ip, background, votes))
+        return jsonify({'ok': True, 'new_score': votes}), 200
+    else:
+        return jsonify({'ok': False, 'new_score': votes}), 200
+    
 @app.route('/api/ollama/ps')
 def ollama_ps():
     try:
-        resp = requests.get(f"{OLLAMA_HOST}/api/ps", timeout=5)
+        resp = requests.get(f"{OLLAMA_HOST}/api/ps", timeout=1)
         resp.raise_for_status()
         return jsonify(resp.json())
     except Exception as e:
@@ -342,7 +425,7 @@ def ollama_ps():
 @app.route('/api/ollama/tags')
 def ollama_tags():
     try:
-        resp = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=5)
+        resp = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=1)
         resp.raise_for_status()
         return jsonify(resp.json())
     except Exception as e:
