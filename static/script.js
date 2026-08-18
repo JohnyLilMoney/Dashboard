@@ -462,7 +462,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         container.addEventListener('mouseleave', () => {
             const timeoutVal = toast._currentTimeoutVal;
-            if (container.classList.contains('show-active')) {
+            
+            if (container.classList.contains('show-active') && timeoutVal > 0) {
                 toast._timeout = setTimeout(hideToast, timeoutVal);
             }
         });
