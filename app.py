@@ -419,7 +419,7 @@ def ollama_ps():
         resp.raise_for_status()
         return jsonify(resp.json())
     except Exception as e:
-        return jsonify({"error": str(e), "models": []}), 500
+        return jsonify({"error": str(e), "models": []}), 200
 
 @app.route('/api/ollama/tags')
 def ollama_tags():
@@ -428,7 +428,7 @@ def ollama_tags():
         resp.raise_for_status()
         return jsonify(resp.json())
     except Exception as e:
-        return jsonify({"error": str(e), "models": []}), 500
+        return jsonify({"error": str(e), "models": []}), 200
 
 def ping_minecraft(ip, port=25565):
     try:
