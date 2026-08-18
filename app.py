@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 load_dotenv('/home/johny/dashboard/.env')
 from ssh import ssh_command, ssh_output
 from db import close_db, init_db, query_db, update_db, get_background_scores, modify_db, DB_PATH
+import os
 
 if not os.path.exists(DB_PATH):
     print(f"Database file '{DB_PATH}' not found. Initializing...")
@@ -23,7 +24,6 @@ from concurrent.futures import ThreadPoolExecutor
 import logging
 from mcstatus import JavaServer
 import requests
-import os
 import random
 import secrets
 import ipaddress
