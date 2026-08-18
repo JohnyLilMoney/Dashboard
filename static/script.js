@@ -424,6 +424,8 @@ function showToast(message, onClick = null, showReload = false, timeout = 3000) 
     toast.classList.add('show');
     clearTimeout(toast._timeout);
 
+    toast._currentTimeoutVal = timeout; 
+
     const persistent = timeout <= 0;
     closeBtn.style.display = persistent ? 'flex' : 'none';
 
@@ -448,6 +450,26 @@ function hideToast() {
     likeBtn.style.display = 'none';
     dislikeBtn.style.display = 'none';
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.toast-container');
+    const toast = document.getElementById('toast');
+
+    if (container && toast) {
+        container.addEventListener('mouseenter', () => {
+            if (toast.classList.contains('show')) {
+                clearTimeout(toast._timeout);
+            }
+        });
+
+        container.addEventListener('mouseleave', () => {
+            const timeoutVal = toast._currentTimeoutVal;
+            if (toast.classList.contains('show') && timeoutVal > 0) {
+                toast._timeout = setTimeout(hideToast, timeoutVal);
+            }
+        });
+    }
+});
 
 function confirmWebsiteNav(url) {
     const proceed = window.confirm(
