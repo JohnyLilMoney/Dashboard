@@ -304,12 +304,15 @@ def get_available_backgrounds(exclude=None):
 
     ip = request.remote_addr
     scores = get_background_scores(ip)
-    packs = []
+    packs2 = []
     for score in scores:
-        background, score = score
-        for i in range(score):
-            packs.append(background)
-    return packs
+        background, votes = score
+        for i in range(votes):
+            packs2.append(background)
+    if packs2:
+        return packs2
+    else:
+        return packs
 
 @app.route('/<pack_name>')
 def background_pack(pack_name):
