@@ -376,7 +376,7 @@ def like_background():
         votes = 5
     else:
         try:
-            votes = int(row)
+            votes = int(row[0])
         except (ValueError, TypeError):
             return jsonify({'error': 'Score data is corrupted or not a number'}), 500
 
@@ -405,7 +405,7 @@ def dislike_background():
         votes = 5
     else:
         try:
-            votes = int(row)
+            votes = int(row[0])
         except (ValueError, TypeError):
             return jsonify({'error': 'Score data is corrupted or not a number'}), 500
         
