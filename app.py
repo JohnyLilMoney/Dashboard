@@ -381,8 +381,6 @@ def like_background(background: str):
         return jsonify({'ok': True, 'new_score': votes}), 200
     else:
         return jsonify({'ok': False, 'new_score': votes}), 200
-    
-
 
 @app.route('/api/dislike_background')
 def dislike_background(background: str):
