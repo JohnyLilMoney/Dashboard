@@ -5,9 +5,7 @@
     waterTop: 'rgba(15,17,23,0.92)',
     waterBottom: 'rgba(8,10,15,0.95)',
     sand: 'rgba(26,29,39,0.25)',
-    sandDetail: 'rgba(42,45,58,0.15)',
     plant: 'rgba(42,45,58,0.35)',
-    plantHighlight: 'rgba(90,95,120,0.20)',
     fish: [
       'rgba(90,110,200,0.12)',
       'rgba(90,110,200,0.10)',
@@ -279,8 +277,17 @@
     let width, height;
     const dpr = 1;
 
+    let fish = [];
+    let plants = [];
+    let bubbles = [];
+    const maxBubbles = 15 + randInt(0, 10);
+
+    let frameId = null;
+    let running = true;
+    let time = 0;
+
     function resize() {
-      const rect = canvas.parentElement.getBoundingClientRect();
+      const rect = shadowRoot.host.getBoundingClientRect();
       width = rect.width;
       height = rect.height;
       canvas.width = width * dpr;
@@ -290,38 +297,32 @@
       ctx.scale(dpr, dpr);
     }
 
-    resize();
+    function initObjects() {
+      fish = [];
+      plants = [];
+      bubbles = [];
 
-    const fish = [];
-    for (let i = 0; i < 6 + randInt(0, 4); i++) {
-      fish.push(new Fish(width, height));
+      for (let i = 0; i < 6 + randInt(0, 4); i++) {
+        fish.push(new Fish(width, height));
+      }
+
+      for (let i = 0; i < 8 + randInt(0, 5); i++) {
+        plants.push(new Plant(width, height));
+      }
+
+      for (let i = 0; i < randInt(0, 5); i++) {
+        bubbles.push(new Bubble(width, height));
+      }
     }
-
-    const plants = [];
-    for (let i = 0; i < 8 + randInt(0, 5); i++) {
-      plants.push(new Plant(width, height));
-    }
-
-    const bubbles = [];
-    const maxBubbles = 15 + randInt(0, 10);
-
-    let frameId = null;
-    let running = true;
-    let time = 0;
 
     function animate() {
       if (!running) return;
 
-      const newWidth = canvas.parentElement.clientWidth;
-      const newHeight = canvas.parentElement.clientHeight;
+      const newWidth = shadowRoot.host.clientWidth;
+      const newHeight = shadowRoot.host.clientHeight;
       if (newWidth !== width || newHeight !== height) {
-        width = newWidth;
-        height = newHeight;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        canvas.style.width = width + 'px';
-        canvas.style.height = height + 'px';
-        ctx.scale(dpr, dpr);
+        resize();
+        initObjects();
       }
 
       time++;
@@ -370,17 +371,43 @@
       frameId = requestAnimationFrame(animate);
     }
 
-    animate();
+    function start() {
+      resize();
+      initObjects();
+      if (frameId) cancelAnimationFrame(frameId);
+      running = true;
+      animate();
+    }
+
+    function destroy() {
+      running = false;
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+        frameId = null;
+      }
+      ctx.clearRect(0, 0, width, height);
+      fish = [];
+      plants = [];
+      bubbles = [];
+    }
+
+    const resizeHandler = () => {
+      resize();
+      initObjects();
+    };
+    window.addEventListener('resize', resizeHandler);
+
+    start();
 
     return {
-      stop: function() {
-        running = false;
-        if (frameId) {
-          cancelAnimationFrame(frameId);
-          frameId = null;
-        }
+      destroy: function() {
+        destroy();
+        window.removeEventListener('resize', resizeHandler);
       },
-      resize: resize,
+      resize: function() {
+        resize();
+        initObjects();
+      }
     };
   }
 
