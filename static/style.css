@@ -12,10 +12,21 @@
     --radius: 12px;
     --transition: 0.2s ease;
     --unavailable: #f97316;
-    --frost-bg: rgba(26, 29, 39, 0.55);
-    --frost-bg-strong: rgba(15, 17, 23, 0.65);
-    --frost-border: rgba(255, 255, 255, 0.08);
-    --frost-blur: blur(14px) saturate(160%);
+
+    --frost-bg: rgba(255, 255, 255, 0.07);
+    --frost-bg-strong: rgba(255, 255, 255, 0.11);
+    --frost-border: rgba(255, 255, 255, 0.14);
+    --frost-blur: blur(20px) saturate(180%) brightness(1.15);
+    --frost-highlight: rgba(255, 255, 255, 0.22);
+    --frost-gradient: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.13) 0%,
+        rgba(255, 255, 255, 0.02) 45%,
+        rgba(255, 255, 255, 0.06) 100%
+    );
+    --frost-shadow: inset 0 1px 0 var(--frost-highlight),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+        0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .dashboard {
@@ -51,7 +62,10 @@ body.ui-hidden .reload-badge {
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--bg);
+    background:
+        radial-gradient(1000px 700px at 20% 20%, rgba(108, 140, 255, 0.18), transparent 60%),
+        radial-gradient(800px 600px at 80% 70%, rgba(52, 211, 153, 0.12), transparent 55%),
+        var(--bg);
     color: var(--text);
     min-height: 100vh;
     display: flex;
@@ -93,18 +107,20 @@ body {
 }
 
 .server-card {
-    background: var(--frost-bg);
+    position: relative;
+    background: var(--frost-gradient), var(--frost-bg);
     border: 1px solid var(--frost-border);
     border-radius: var(--radius);
     padding: 20px;
-    transition: border-color var(--transition);
-    will-change: transform;
     -webkit-backdrop-filter: var(--frost-blur);
     backdrop-filter: var(--frost-blur);
+    box-shadow: var(--frost-shadow);
+    transition: border-color var(--transition);
+    will-change: transform;
 }
 
 .server-card:hover {
-    border-color: #3a3f55;
+    border-color: rgba(255, 255, 255, 0.25);
 }
 
 .card-top {
@@ -224,7 +240,7 @@ body {
 
 .expand-toggle {
     width: 100%;
-    background: rgba(15, 17, 23, 0.35);
+    background: var(--frost-gradient), var(--frost-bg);
     border: 1px solid var(--frost-border);
     border-radius: 8px;
     color: var(--text-secondary);
@@ -237,13 +253,14 @@ body {
     justify-content: space-between;
     position: relative;
     z-index: 2;
+    -webkit-backdrop-filter: var(--frost-blur);
+    backdrop-filter: var(--frost-blur);
+    box-shadow: inset 0 1px 0 var(--frost-highlight);
     transition: border-radius 0.2s ease, color var(--transition);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
 }
 
 .expand-toggle:hover {
-    border-color: #4a4f66;
+    border-color: rgba(255, 255, 255, 0.25);
     color: var(--text);
 }
 
@@ -255,16 +272,17 @@ body {
 .expanded-panel {
     margin-top: -1px;
     border-style: solid;
-    border-color: transparent;
+    border-color: var(--frost-border);
     border-width: 0 1px;
     border-top-width: 0;
     border-radius: 0 0 8px 8px;
     max-height: 0;
     overflow: hidden;
     padding: 0 16px;
-    background: rgba(15, 17, 23, 0.4);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    background: var(--frost-gradient), var(--frost-bg);
+    -webkit-backdrop-filter: var(--frost-blur);
+    backdrop-filter: var(--frost-blur);
+    box-shadow: inset 0 1px 0 var(--frost-highlight);
     transition: max-height 0.35s ease, padding 0.35s ease, border-width 0.35s ease, border-color 0.35s ease;
     position: relative;
     z-index: 1;
@@ -278,7 +296,7 @@ body {
 }
 
 .server-card.panel-open .expanded-panel {
-    border-color: var(--border);
+    border-color: var(--frost-border);
     border-width: 1px;
     border-top-width: 0;
     max-height: 2000px;
@@ -286,7 +304,7 @@ body {
 }
 
 .server-card:hover .expand-toggle {
-    border-color: #4a4f66;
+    border-color: rgba(255, 255, 255, 0.25);
 }
 
 .toggle-arrow {
@@ -331,21 +349,22 @@ body {
 
 .action-btn {
     padding: 8px 16px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--frost-border);
     border-radius: 7px;
     font-size: 0.85rem;
     font-family: inherit;
     font-weight: 500;
     cursor: pointer;
     transition: background var(--transition), border-color var(--transition), transform 0.1s ease;
-    background: rgba(26, 29, 39, 0.4);
+    background: var(--frost-gradient), var(--frost-bg);
     color: var(--text);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: var(--frost-blur);
+    backdrop-filter: var(--frost-blur);
+    box-shadow: inset 0 1px 0 var(--frost-highlight);
 }
 
 .action-btn:hover {
-    border-color: #4a4f66;
+    border-color: rgba(255, 255, 255, 0.25);
 }
 
 .action-btn:active {
@@ -474,12 +493,13 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
+    background: var(--frost-gradient), var(--frost-bg);
+    -webkit-backdrop-filter: var(--frost-blur);
+    backdrop-filter: var(--frost-blur);
     padding: 4px 10px 4px 6px;
     border-radius: 6px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--frost-border);
+    box-shadow: inset 0 1px 0 var(--frost-highlight);
     overflow: hidden;
 }
 
@@ -540,12 +560,13 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
+    background: var(--frost-gradient), var(--frost-bg);
+    -webkit-backdrop-filter: var(--frost-blur);
+    backdrop-filter: var(--frost-blur);
     padding: 4px 10px;
     border-radius: 6px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--frost-border);
+    box-shadow: inset 0 1px 0 var(--frost-highlight);
     overflow: hidden;
     max-width: 100%;
     min-width: 0;
@@ -577,18 +598,18 @@ body {
 }
 
 .server-card:hover .expanded-panel {
-    border-color: #4a4f66 !important;
+    border-color: var(--frost-border);
 }
 
 .toast {
     position: relative;
-    background: #2d3143;
+    background: var(--frost-gradient), var(--frost-bg-strong);
     color: var(--text);
     padding: 12px 20px;
     border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 500;
-    border: 1px solid var(--border);
+    border: 1px solid var(--frost-border);
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
@@ -600,6 +621,9 @@ body {
     word-break: break-word;
     text-align: center;
     line-height: 1.4;
+    -webkit-backdrop-filter: var(--frost-blur);
+    backdrop-filter: var(--frost-blur);
+    box-shadow: inset 0 1px 0 var(--frost-highlight);
 }
 
 .toast.show {
@@ -645,18 +669,18 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(45, 55, 72, 0.4);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    color: rgba(200, 200, 200, 0.4);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    background: var(--frost-gradient), var(--frost-bg-strong);
+    -webkit-backdrop-filter: var(--frost-blur);
+    backdrop-filter: var(--frost-blur);
+    color: rgba(200, 200, 200, 0.6);
+    box-shadow: inset 0 1px 0 var(--frost-highlight), 0 4px 14px rgba(0, 0, 0, 0.35);
     transition: transform 0.2s ease, background 0.2s ease, opacity 0.3s ease;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
 .info-badge:hover {
     transform: scale(1.08);
-    background: rgba(55, 65, 85, 0.92);
+    background: var(--frost-bg-strong);
 }
 
 .info-badge:active {
@@ -670,11 +694,11 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(45, 55, 72, 0.4);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    color: rgba(200, 200, 200, 0.4);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    background: var(--frost-gradient), var(--frost-bg-strong);
+    -webkit-backdrop-filter: var(--frost-blur);
+    backdrop-filter: var(--frost-blur);
+    color: rgba(200, 200, 200, 0.6);
+    box-shadow: inset 0 1px 0 var(--frost-highlight), 0 4px 14px rgba(0, 0, 0, 0.35);
     transition: transform 0.2s ease, background 0.2s ease, opacity 0.3s ease;
     cursor: pointer;
     border: none;
@@ -686,7 +710,7 @@ body {
 
 .reload-badge:hover {
     transform: scale(1.08);
-    background: rgba(55, 65, 85, 0.92);
+    background: var(--frost-bg-strong);
 }
 
 .reload-badge:active {
@@ -718,8 +742,8 @@ body {
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: #2d3143;
-    border: 1px solid var(--border);
+    background: var(--frost-bg-strong);
+    border: 1px solid var(--frost-border);
     color: var(--text);
     font-size: 12px;
     line-height: 1;
@@ -727,6 +751,8 @@ body {
     justify-content: center;
     cursor: pointer;
     padding: 0;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
 }
 
 .toast-close-btn:hover {
@@ -817,6 +843,7 @@ body {
         font-size: 28px;
     }
 }
+
 .auth-modal-overlay {
     display: none;
     position: fixed;
@@ -834,14 +861,14 @@ body {
 }
 
 .auth-modal {
-    background: var(--frost-bg-strong);
-    border: 1px solid var(--border);
+    background: var(--frost-gradient), var(--frost-bg-strong);
+    border: 1px solid var(--frost-border);
     border-radius: var(--radius);
     padding: 22px;
     width: 260px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
-    backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: var(--frost-shadow);
+    -webkit-backdrop-filter: var(--frost-blur);
+    backdrop-filter: var(--frost-blur);
 }
 
 .auth-modal h3 {
@@ -856,8 +883,8 @@ body {
     box-sizing: border-box;
     padding: 9px 10px;
     border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--bg);
+    border: 1px solid var(--frost-border);
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text);
     font-family: inherit;
     font-size: 14px;
@@ -885,13 +912,15 @@ body {
 .auth-modal-actions button {
     padding: 7px 14px;
     border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--card-bg);
+    border: 1px solid var(--frost-border);
+    background: var(--frost-bg);
     color: var(--text);
     cursor: pointer;
     font-family: inherit;
     font-size: 13px;
     transition: background var(--transition), border-color var(--transition);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
 }
 
 .auth-modal-actions button:hover {
