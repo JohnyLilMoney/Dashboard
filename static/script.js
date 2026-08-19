@@ -393,7 +393,7 @@ function likeCurrentBg() {
                 return response.json();
             })
             .then(data => {
-                showScore(data.new_score);
+                showScore(data.new_score, data.ok);
             })
             .catch(error => console.error("Error liking background:", error));
     } else {
@@ -413,7 +413,7 @@ function dislikeCurrentBg() {
                 return response.json();
             })
             .then(data => {
-                showScore(data.new_score);
+                showScore(data.new_score, data.ok);
             })
             .catch(error => console.error("Error disliking background:", error));
     } else {
@@ -440,6 +440,7 @@ function triggerLimitShake(toast) {
     void toast.offsetWidth;
     toast.classList.add('limit-reached');
 }
+
 function resetToast() {
     const toast = document.getElementById('toast');
     const scoreEl = document.getElementById('toast-score');
