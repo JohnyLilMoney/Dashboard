@@ -290,6 +290,8 @@
       ctx.scale(dpr, dpr);
     }
 
+    resize();
+
     const fish = [];
     for (let i = 0; i < 6 + randInt(0, 4); i++) {
       fish.push(new Fish(width, height));
@@ -368,7 +370,6 @@
       frameId = requestAnimationFrame(animate);
     }
 
-    resize();
     animate();
 
     return {
