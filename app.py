@@ -233,7 +233,7 @@ def get_tailscale_user_for_request():
         return None
     return get_tailscale_identity(request.remote_addr)
 
-HEADER_PREFIXES = ["Fakka", "Ewa", "Yo", "Wazzaaaa", "Wsg", "Ey", "Assalam alaykom"]
+HEADER_PREFIXES = ["Fakka", "Ewa", "Yo", "Wazzaaaa", "Wsg", "Ey", "Assalam alaykum"]
 
 def build_header():
     name = get_tailscale_user_for_request()
