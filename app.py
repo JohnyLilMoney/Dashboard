@@ -233,7 +233,7 @@ def get_tailscale_user_for_request():
         return None
     return get_tailscale_identity(request.remote_addr)
 
-HEADER_PREFIXES = ["Fakka", "Ewa", "Yo"]
+HEADER_PREFIXES = ["Fakka", "Ewa", "Yo", "Wazzaaaa", "Wsg", "Ey", "Assalam alaykom"]
 
 def build_header():
     name = get_tailscale_user_for_request()
@@ -482,7 +482,6 @@ def _check_windows_alive(ip, port):
         return False
 
 def get_local_uptime():
-    """Read system uptime from /proc/uptime, return human-readable string."""
     try:
         with open('/proc/uptime', 'r') as f:
             uptime_seconds = float(f.readline().split()[0])
@@ -589,7 +588,6 @@ def get_server_status(ip, is_mc=False):
         return status_data
 
 def get_display_status(name, ip, is_mc):
-    """Wraps get_server_status with the shared 'starting' overlay."""
     real_status = get_server_status(ip, is_mc)
 
     with _pending_lock:
