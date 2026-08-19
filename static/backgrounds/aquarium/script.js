@@ -9,14 +9,14 @@
     plant: 'rgba(42,45,58,0.35)',
     plantHighlight: 'rgba(90,95,120,0.20)',
     fish: [
-      'rgba(108,140,255,0.25)',
-      'rgba(108,140,255,0.20)',
-      'rgba(128,156,255,0.20)',
-      'rgba(90,95,120,0.25)',
-      'rgba(150,160,180,0.20)',
+      'rgba(90,110,200,0.12)',
+      'rgba(90,110,200,0.10)',
+      'rgba(110,130,210,0.10)',
+      'rgba(70,80,110,0.15)',
+      'rgba(130,140,160,0.10)',
     ],
-    bubble: 'rgba(180,200,240,0.12)',
-    bubbleHighlight: 'rgba(220,235,255,0.18)',
+    bubble: 'rgba(160,180,220,0.06)',
+    bubbleHighlight: 'rgba(200,215,240,0.10)',
   };
 
   function rand(min, max) { return Math.random() * (max - min) + min; }
@@ -136,19 +136,19 @@
       const eyeX = s * 0.35;
       ctx.beginPath();
       ctx.arc(eyeX, -s * 0.1, this.eyeSize, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(200,215,235,0.6)';
+      ctx.fillStyle = 'rgba(200,215,235,0.4)';
       ctx.fill();
       ctx.beginPath();
       ctx.arc(eyeX + this.eyeSize * 0.4, -s * 0.1 + this.eyeSize * 0.2,
               this.eyeSize * 0.4, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(20,25,35,0.8)';
+      ctx.fillStyle = 'rgba(20,25,35,0.7)';
       ctx.fill();
 
       ctx.beginPath();
       ctx.moveTo(-s * 0.1, -s * 0.45);
       ctx.quadraticCurveTo(s * 0.1, -s * 0.85, s * 0.4, -s * 0.45);
       ctx.fillStyle = this.color;
-      ctx.globalAlpha = 0.5;
+      ctx.globalAlpha = 0.4;
       ctx.fill();
       ctx.globalAlpha = 1;
 
