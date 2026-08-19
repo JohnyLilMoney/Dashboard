@@ -12,6 +12,10 @@
     --radius: 12px;
     --transition: 0.2s ease;
     --unavailable: #f97316;
+    --frost-bg: rgba(26, 29, 39, 0.55);
+    --frost-bg-strong: rgba(15, 17, 23, 0.65);
+    --frost-border: rgba(255, 255, 255, 0.08);
+    --frost-blur: blur(14px) saturate(160%);
 }
 
 .dashboard {
@@ -89,12 +93,14 @@ body {
 }
 
 .server-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
+    background: var(--frost-bg);
+    border: 1px solid var(--frost-border);
     border-radius: var(--radius);
     padding: 20px;
     transition: border-color var(--transition);
     will-change: transform;
+    -webkit-backdrop-filter: var(--frost-blur);
+    backdrop-filter: var(--frost-blur);
 }
 
 .server-card:hover {
@@ -203,6 +209,14 @@ body {
     transform: translateX(-50%) translateY(-4px);
 }
 
+.status-badge.online,
+.status-badge.offline,
+.status-badge.starting,
+.status-badge.unavailable {
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+
 @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
@@ -210,8 +224,8 @@ body {
 
 .expand-toggle {
     width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
+    background: rgba(15, 17, 23, 0.35);
+    border: 1px solid var(--frost-border);
     border-radius: 8px;
     color: var(--text-secondary);
     padding: 10px 14px;
@@ -224,6 +238,8 @@ body {
     position: relative;
     z-index: 2;
     transition: border-radius 0.2s ease, color var(--transition);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
 }
 
 .expand-toggle:hover {
@@ -246,7 +262,9 @@ body {
     max-height: 0;
     overflow: hidden;
     padding: 0 16px;
-    background: var(--bg);
+    background: rgba(15, 17, 23, 0.4);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     transition: max-height 0.35s ease, padding 0.35s ease, border-width 0.35s ease, border-color 0.35s ease;
     position: relative;
     z-index: 1;
@@ -255,8 +273,8 @@ body {
 }
 
 .expanded-panel > * {
-  transform: translateZ(0);
-  backface-visibility: hidden;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .server-card.panel-open .expanded-panel {
@@ -320,8 +338,10 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: background var(--transition), border-color var(--transition), transform 0.1s ease;
-    background: var(--card-bg);
+    background: rgba(26, 29, 39, 0.4);
     color: var(--text);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
 }
 
 .action-btn:hover {
@@ -454,7 +474,9 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.05);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
     padding: 4px 10px 4px 6px;
     border-radius: 6px;
     border: 1px solid var(--border);
@@ -518,7 +540,9 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.05);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
     padding: 4px 10px;
     border-radius: 6px;
     border: 1px solid var(--border);
@@ -574,8 +598,8 @@ body {
     white-space: normal;
     overflow-wrap: break-word;
     word-break: break-word;
-    text-align: center; 
-    line-height: 1.4;    
+    text-align: center;
+    line-height: 1.4;
 }
 
 .toast.show {
@@ -622,7 +646,8 @@ body {
     height: 40px;
     border-radius: 50%;
     background: rgba(45, 55, 72, 0.4);
-    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
     color: rgba(200, 200, 200, 0.4);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
     transition: transform 0.2s ease, background 0.2s ease, opacity 0.3s ease;
@@ -646,7 +671,8 @@ body {
     height: 40px;
     border-radius: 50%;
     background: rgba(45, 55, 72, 0.4);
-    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
     color: rgba(200, 200, 200, 0.4);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
     transition: transform 0.2s ease, background 0.2s ease, opacity 0.3s ease;
@@ -795,10 +821,12 @@ body {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.35);
     z-index: 2000;
     align-items: center;
     justify-content: center;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
 }
 
 .auth-modal-overlay.show {
@@ -806,12 +834,14 @@ body {
 }
 
 .auth-modal {
-    background: var(--card-bg);
+    background: var(--frost-bg-strong);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 22px;
     width: 260px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
 }
 
 .auth-modal h3 {
