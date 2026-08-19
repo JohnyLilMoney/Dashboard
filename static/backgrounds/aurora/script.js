@@ -17,12 +17,12 @@ window.initAnimation = function(shadowRoot) {
     auroraCanvas.style.width = '100%';
     auroraCanvas.style.height = '100%';
     auroraCanvas.style.pointerEvents = 'none';
-    auroraCanvas.style.filter = 'blur(10px)';
     auroraCanvas.style.opacity = '0.9';
     shadowRoot.appendChild(auroraCanvas);
     const auroraCtx = auroraCanvas.getContext('2d');
 
     let W, H;
+    let nativeW, nativeH;
     let animId = null;
     let running = true;
     let frameCount = 0;
@@ -169,7 +169,8 @@ window.initAnimation = function(shadowRoot) {
             const bob = Math.sin(this.bobPhase + t * this.bobSpeed) * this.bobAmount;
             const topPts = [];
             const bottomPts = [];
-            let minY = Infinity, maxY = -Infinity;
+            let minY = Infinity;
+            let maxY = -Infinity;
 
             for (let i = 0; i <= EDGE_SEGMENTS; i++) {
                 const xFrac = i / EDGE_SEGMENTS;
@@ -197,7 +198,13 @@ window.initAnimation = function(shadowRoot) {
             for (let i = bottomPts.length - 1; i >= 0; i--) path.lineTo(bottomPts[i].x, bottomPts[i].y);
             path.closePath();
 
-            return { path, minY: Math.max(0, minY), maxY: Math.min(H * HORIZON_Y_FRACTION, maxY), topPts, bottomPts };
+            return {
+                path,
+                minY: Math.max(0, minY),
+                maxY: Math.min(H * HORIZON_Y_FRACTION, maxY),
+                topPts,
+                bottomPts
+            };
         }
 
         gradientForRange(minY, maxY, opacityMult, targetCtx) {
@@ -216,6 +223,7 @@ window.initAnimation = function(shadowRoot) {
         drawFringes(ctx, t, minY, maxY, topPts, bottomPts) {
             ctx.save();
             ctx.globalCompositeOperation = 'lighter';
+
             for (const f of this.fringes) {
                 const pts = f.side === 'top' ? topPts : bottomPts;
                 const idx = Math.min(pts.length - 1, Math.floor(f.xFrac * pts.length));
@@ -237,6 +245,7 @@ window.initAnimation = function(shadowRoot) {
                 ctx.ellipse(cx, cy, len * 0.5, len, 0, 0, Math.PI * 2);
                 ctx.fill();
             }
+
             ctx.restore();
         }
 
@@ -262,16 +271,20 @@ window.initAnimation = function(shadowRoot) {
             ctx.save();
             ctx.clip(coreInfo.path);
             ctx.globalCompositeOperation = 'lighter';
+
             for (const ray of this.rays) {
                 const shimmer = 0.5 + 0.5 * Math.sin(ray.phase + t * ray.speed);
                 const x = ray.xFrac * W;
                 const c = sampleGradientColor(0.5);
                 const alpha = RAY_OPACITY * this.opacityScale * ray.baseAlpha * shimmer;
+
                 ctx.fillStyle = `rgba(255,255,255,${alpha * 0.5})`;
                 ctx.fillRect(x - ray.width / 2, coreInfo.minY, ray.width, coreInfo.maxY - coreInfo.minY);
+
                 ctx.fillStyle = `rgba(${c.r | 0},${c.g | 0},${c.b | 0},${alpha})`;
-                ctx.fillRect(x - ray.width, coreInfo.minY, ray.width * 2, coreInfo.maxY - coreInfo.minY);
+                ctx.fillRect(x - ray.width * 2, coreInfo.minY, ray.width * 2, coreInfo.maxY - coreInfo.minY);
             }
+
             ctx.restore();
 
             this.drawFringes(ctx, t, coreInfo.minY, coreInfo.maxY, coreInfo.topPts, coreInfo.bottomPts);
@@ -280,17 +293,19 @@ window.initAnimation = function(shadowRoot) {
 
     function generateSheets() {
         const out = [];
-        for (let i = 0; i < SHEET_COUNT; i++) out.push(new AuroraSheet(i));
+        for (let i = 0; i < SHEET_COUNT; i++) {
+            out.push(new AuroraSheet(i));
+        }
         return out;
     }
 
     function generateStars() {
         const out = [];
-        const count = Math.floor((W * H) / 9000);
+        const count = Math.floor((nativeW * nativeH) / 9000);
         for (let i = 0; i < count; i++) {
             out.push({
-                x: Math.random() * W,
-                y: Math.random() * H * HORIZON_Y_FRACTION * 0.9,
+                x: Math.random() * nativeW,
+                y: Math.random() * nativeH * HORIZON_Y_FRACTION * 0.9,
                 size: Math.random() < 0.85 ? 1 : 2,
                 a: 0.3 + Math.random() * 0.7,
                 seed: Math.random() * Math.PI * 2
@@ -300,11 +315,11 @@ window.initAnimation = function(shadowRoot) {
     }
 
     function drawSky() {
-        const grad = bgCtx.createLinearGradient(0, 0, 0, H * HORIZON_Y_FRACTION);
+        const grad = bgCtx.createLinearGradient(0, 0, 0, nativeH * HORIZON_Y_FRACTION);
         grad.addColorStop(0, SKY_TOP);
         grad.addColorStop(1, SKY_HORIZON);
         bgCtx.fillStyle = grad;
-        bgCtx.fillRect(0, 0, W, H);
+        bgCtx.fillRect(0, 0, nativeW, nativeH);
     }
 
     function drawStars() {
@@ -319,41 +334,47 @@ window.initAnimation = function(shadowRoot) {
     }
 
     function drawTerrain() {
-        const baseY = H * HORIZON_Y_FRACTION;
+        const baseY = nativeH * HORIZON_Y_FRACTION;
         bgCtx.beginPath();
-        bgCtx.moveTo(0, H);
-        bgCtx.lineTo(0, baseY + H * 0.02);
+        bgCtx.moveTo(0, nativeH);
+        bgCtx.lineTo(0, baseY + nativeH * 0.02);
+
         const segments = 10;
         for (let i = 0; i <= segments; i++) {
-            const x = (W / segments) * i;
-            const jag = Math.sin(i * 1.7 + 3.1) * H * 0.015 + Math.sin(i * 0.6) * H * 0.01;
-            bgCtx.lineTo(x, baseY + H * 0.02 + jag);
+            const x = (nativeW / segments) * i;
+            const jag = Math.sin(i * 1.7 + 3.1) * nativeH * 0.015 + Math.sin(i * 0.6) * nativeH * 0.01;
+            bgCtx.lineTo(x, baseY + nativeH * 0.02 + jag);
         }
-        bgCtx.lineTo(W, H);
+
+        bgCtx.lineTo(nativeW, nativeH);
         bgCtx.closePath();
         bgCtx.fillStyle = TERRAIN_COLOR;
         bgCtx.fill();
 
-        const edgeGrad = bgCtx.createLinearGradient(0, baseY - H * 0.02, 0, baseY + H * 0.04);
+        const edgeGrad = bgCtx.createLinearGradient(0, baseY - nativeH * 0.02, 0, baseY + nativeH * 0.04);
         edgeGrad.addColorStop(0, 'rgba(120,180,255,0)');
         edgeGrad.addColorStop(0.5, 'rgba(120,180,255,0.06)');
         edgeGrad.addColorStop(1, 'rgba(120,180,255,0)');
         bgCtx.fillStyle = edgeGrad;
-        bgCtx.fillRect(0, baseY - H * 0.02, W, H * 0.06);
+        bgCtx.fillRect(0, baseY - nativeH * 0.02, nativeW, nativeH * 0.06);
     }
 
     function resizeCanvas() {
         const rect = shadowRoot.host.getBoundingClientRect();
-        W = Math.round(rect.width);
-        H = Math.round(rect.height);
-        canvas.width = W;
-        canvas.height = H;
-        canvas.style.width = W + 'px';
-        canvas.style.height = H + 'px';
+        nativeW = Math.round(rect.width);
+        nativeH = Math.round(rect.height);
+
+        canvas.width = nativeW;
+        canvas.height = nativeH;
+        canvas.style.width = nativeW + 'px';
+        canvas.style.height = nativeH + 'px';
+
+        W = Math.round(nativeW * 0.25);
+        H = Math.round(nativeH * 0.25);
         auroraCanvas.width = W;
         auroraCanvas.height = H;
-        auroraCanvas.style.width = W + 'px';
-        auroraCanvas.style.height = H + 'px';
+        auroraCanvas.style.width = nativeW + 'px';
+        auroraCanvas.style.height = nativeH + 'px';
     }
 
     function scaleStarPositions(scaleX, scaleY) {
@@ -365,13 +386,21 @@ window.initAnimation = function(shadowRoot) {
 
     function handleResize() {
         const rect = shadowRoot.host.getBoundingClientRect();
-        const newW = Math.round(rect.width);
-        const newH = Math.round(rect.height);
-        if (newW !== W || newH !== H) {
-            const scaleX = W > 0 ? newW / W : 1;
-            const scaleY = H > 0 ? newH / H : 1;
+        const newNativeW = Math.round(rect.width);
+        const newNativeH = Math.round(rect.height);
+
+        if (newNativeW !== nativeW || newNativeH !== nativeH) {
+            const scaleX = nativeW > 0 ? newNativeW / nativeW : 1;
+            const scaleY = nativeH > 0 ? newNativeH / nativeH : 1;
+            const oldW = W;
+            const oldH = H;
+
             resizeCanvas();
-            sheets.forEach(sheet => sheet.resize(scaleX, scaleY));
+
+            const auroraScaleX = oldW > 0 ? W / oldW : 1;
+            const auroraScaleY = oldH > 0 ? H / oldH : 1;
+
+            sheets.forEach(sheet => sheet.resize(auroraScaleX, auroraScaleY));
             scaleStarPositions(scaleX, scaleY);
         }
     }
@@ -390,7 +419,7 @@ window.initAnimation = function(shadowRoot) {
 
         handleResize();
 
-        bgCtx.clearRect(0, 0, W, H);
+        bgCtx.clearRect(0, 0, nativeW, nativeH);
         drawSky();
         drawStars();
         drawTerrain();
@@ -413,7 +442,7 @@ window.initAnimation = function(shadowRoot) {
                 cancelAnimationFrame(animId);
                 animId = null;
             }
-            bgCtx.clearRect(0, 0, W, H);
+            bgCtx.clearRect(0, 0, nativeW, nativeH);
             auroraCtx.clearRect(0, 0, W, H);
             sheets = [];
         },
