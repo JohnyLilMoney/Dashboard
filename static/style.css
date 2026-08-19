@@ -732,6 +732,42 @@ body {
     height: 18px;
 }
 
+.toast {
+    position: relative;
+    overflow: hidden;
+}
+
+.toast-score {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(34,197,94,0.35), rgba(34,197,94,0.18));
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+    z-index: 0;
+    will-change: transform;
+}
+
+#toast-message,
+.toast-close-btn,
+.reload-badge {
+    position: relative;
+    z-index: 1;
+}
+
+#toast-message {
+    transition: opacity 0.2s ease;
+    opacity: 1;
+}
+
+.toast.showing-score #toast-message {
+    opacity: 0;
+}
+
 @media (max-width: 480px) {
     .info-badge {
         bottom: 16px;

@@ -387,7 +387,15 @@ function likeCurrentBg() {
     const backgroundName = badge ? badge.dataset.background : null;
     
     if (backgroundName) {
-        fetch(`/api/like_background?background=${encodeURIComponent(backgroundName)}`);
+        fetch(`/api/dislike_background?background=${encodeURIComponent(backgroundName)}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                showScore(data.new_score);
+            })
+            .catch(error => console.error("Error liking background:", error));
     } else {
         console.error("Could not find the current background name on the badge element.");
     }
@@ -399,14 +407,46 @@ function dislikeCurrentBg() {
     const backgroundName = badge ? badge.dataset.background : null;
 
     if (backgroundName) {
-        fetch(`/api/dislike_background?background=${encodeURIComponent(backgroundName)}`);
+        fetch(`/api/dislike_background?background=${encodeURIComponent(backgroundName)}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                showScore(data.new_score);
+            })
+            .catch(error => console.error("Error disliking background:", error));
     } else {
         console.error("Could not find the current background name on the badge element.");
     }
 }
 
+function showScore(score) {
+    const toast = document.getElementById('toast');
+    const scoreEl = document.getElementById('toast-score');
+
+    const pct = Math.max(1, Math.min(10, score)) / 10;
+
+    toast.classList.add('showing-score');
+    scoreEl.style.transform = `scaleX(${pct})`;
+}
+
+function resetToast() {
+    const toast = document.getElementById('toast');
+    const scoreEl = document.getElementById('toast-score');
+
+    toast.classList.remove('showing-score');
+
+    scoreEl.style.transition = 'none';
+    scoreEl.style.transform = 'scaleX(0)';
+    void scoreEl.offsetWidth;
+    scoreEl.style.transition = '';
+}
+
 function showToast(message, onClick = null, showReload = false, timeout = 3000) {
-    const container = document.querySelector('.toast-container'); // Get parent wrapper
+    resetToast();
+
+    const container = document.querySelector('.toast-container');
     const toast = document.getElementById('toast');
     const msgSpan = document.getElementById('toast-message');
     const reloadBtn = document.getElementById('toast-reload-btn');
