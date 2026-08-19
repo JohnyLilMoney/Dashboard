@@ -421,7 +421,7 @@ function dislikeCurrentBg() {
     }
 }
 
-function showScore(score) {
+function showScore(score, ok) {
     const toast = document.getElementById('toast');
     const scoreEl = document.getElementById('toast-score');
 
@@ -429,8 +429,17 @@ function showScore(score) {
 
     toast.classList.add('showing-score');
     scoreEl.style.transform = `scaleX(${pct})`;
+
+    if (ok === false) {
+        triggerLimitShake(toast);
+    }
 }
 
+function triggerLimitShake(toast) {
+    toast.classList.remove('limit-reached');
+    void toast.offsetWidth;
+    toast.classList.add('limit-reached');
+}
 function resetToast() {
     const toast = document.getElementById('toast');
     const scoreEl = document.getElementById('toast-score');

@@ -768,6 +768,18 @@ body {
     opacity: 0;
 }
 
+@keyframes toast-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(3px); }
+}
+
+.toast.limit-reached {
+    animation: toast-shake 0.4s ease;
+}
+
 @media (max-width: 480px) {
     .info-badge {
         bottom: 16px;
