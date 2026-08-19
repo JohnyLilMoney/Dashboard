@@ -387,7 +387,7 @@ function likeCurrentBg() {
     const backgroundName = badge ? badge.dataset.background : null;
     
     if (backgroundName) {
-        fetch(`/api/dislike_background?background=${encodeURIComponent(backgroundName)}`)
+        fetch(`/api/like_background?background=${encodeURIComponent(backgroundName)}`)
             .then(response => {
                 if (!response.ok) throw new Error('Network response was not ok');
                 return response.json();
