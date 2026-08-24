@@ -186,7 +186,7 @@ async function sendCommand(command) {
             const token = await ensureAuthToken();
             result = await tryRequest(token);
         } catch (err) {
-            return; // user cancelled the auth modal
+            typeIn(header, 'Password cancelled.');
         }
     }
 
