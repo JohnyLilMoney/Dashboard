@@ -157,6 +157,36 @@
         </div>
     </div>
 </div>
+<div class="server-card" id="android-server">
+    <div class="card-top">
+        <h2>Android Server</h2>
+        <span class="status-badge offline" id="android-status-badge">
+            <span class="status-dot"></span> Offline
+        </span>
+    </div>
+    <button class="expand-toggle" onclick="togglePanel('android')" id="android-toggle">
+        <span class="toggle-label">Details</span>
+        <span class="toggle-arrow" id="android-arrow">▸</span>
+    </button>
+    <div class="expanded-panel" id="android-panel">
+        <div class="panel-section">
+            <span class="section-label">Uptime</span>
+            <span class="uptime-value" id="android-uptime">--</span>
+		</div>
+        <div class="panel-section">
+            <span class="section-label">Actions</span>
+            <div class="action-buttons">
+                <button class="action-btn start" onclick="sendCommand('basicfit')">Basic Fit Access</button> 
+                <button class="action-btn forward" onclick="sendCommand('clipboard')">Get Clipboard</button> 
+            </div>
+        </div>
+        <div class="panel-section">
+            <span class="section-label">Info</span>
+            <iframe src="/phone/#!action=stream&udid=<serial>&player=webcodecs"
+                    style="width:100%; aspect-ratio:9/20; border:0; border-radius:8px; display:block; margin-top:8px;"></iframe>
+        </div>
+    </div>
+</div>
     </div>
     {% if animation_pack and animation_pack != 'None' %}
         <div class="info-badge" id="infoBadge" onclick="showBackgroundInfo()">
