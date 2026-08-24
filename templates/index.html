@@ -172,18 +172,18 @@
         <div class="panel-section">
             <span class="section-label">Uptime</span>
             <span class="uptime-value" id="android-uptime">--</span>
-		</div>
+        </div>
         <div class="panel-section">
             <span class="section-label">Actions</span>
             <div class="action-buttons">
-                <button class="action-btn start" onclick="sendCommand('basicfit')">Basic Fit Access</button> 
-                <button class="action-btn forward" onclick="sendCommand('clipboard')">Get Clipboard</button> 
+                <button class="action-btn start" onclick="loadPhoneStream()">Basic Fit Access</button>
+                <button class="action-btn start" onclick="sendCommand('clipboard')">Get Clipboard</button>
             </div>
         </div>
         <div class="panel-section">
             <span class="section-label">Info</span>
-            <iframe src="/phone/#!action=stream&udid=<serial>&player=webcodecs"
-                    style="width:100%; aspect-ratio:9/20; border:0; border-radius:8px; display:block; margin-top:8px;"></iframe>
+            <iframe id="android-stream" data-udid="YOUR_DEVICE_SERIAL_HERE"
+                    style="width:100%; aspect-ratio:9/19; border:0; border-radius:8px; margin-top:8px;"></iframe>
         </div>
     </div>
 </div>
