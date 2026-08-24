@@ -28,6 +28,7 @@ import random
 import secrets
 import ipaddress
 from werkzeug.security import check_password_hash
+from urllib.parse import urlparse, parse_qs
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.teardown_appcontext(close_db)
@@ -145,7 +146,9 @@ COMMANDS = {
     'ai':         lambda: wol('04:7c:16:d7:3c:bf'),
     'mc':         lambda: wol('ec:b1:d7:3e:44:45'),
     'mcips':      lambda: "Default: johnylilmoney.nl | TailScale: ts.johnylilmoney.nl | ZeroTier: zt.johnylilmoney.nl",
-    'whatsthis':  lambda: "Odido Klik en Klaar comes with a dynamic ip. This means that the ip changes whenever the router starts, and every 24h after that. When this happens, people not using tailscale/zerotier won't be able to connect to the website for 0-2 minutes, and mc players will be kicked. The expected refresh is only the next one if the router doesn't lose power until then."
+    'whatsthis':  lambda: "Odido Klik en Klaar comes with a dynamic ip. This means that the ip changes whenever the router starts, and every 24h after that. When this happens, people not using tailscale/zerotier won't be able to connect to the website for 0-2 minutes, and mc players will be kicked. The expected refresh is only the next one if the router doesn't lose power until then.",
+    'basicfit':   lambda: basicfit(),
+    'clipboard':  lambda: None
 }
 
 START_COMMANDS = {'ai': 'ai', 'mc': 'mc', 'aireboot': 'ai', 'mcreboot': 'mc'}
@@ -232,6 +235,40 @@ def get_tailscale_user_for_request():
     if not _request_is_trusted():
         return None
     return get_tailscale_identity(request.remote_addr)
+
+_stream_tokens = {}
+_stream_tokens_lock = threading.Lock()
+STREAM_TOKEN_TTL_SECONDS = 60  # only needs to outlive the initial connect, not the whole session
+
+def _issue_stream_token():
+    token = secrets.token_urlsafe(24)
+    with _stream_tokens_lock:
+        _stream_tokens[token] = time.time() + STREAM_TOKEN_TTL_SECONDS
+    return token
+
+def _stream_token_is_valid(token):
+    if not token:
+        return False
+    with _stream_tokens_lock:
+        expiry = _stream_tokens.get(token)
+        if expiry is None:
+            return False
+        if time.time() > expiry:
+            del _stream_tokens[token]
+            return False
+        return True
+
+def basicfit():
+    return _issue_stream_token()
+
+@app.route('/api/stream_auth')
+def stream_auth():
+    original_uri = request.headers.get('X-Original-URI', '')
+    query = urlparse(original_uri).query
+    token = parse_qs(query).get('stream_token', [None])[0]
+    if _stream_token_is_valid(token):
+        return '', 200
+    return '', 401
 
 HEADER_PREFIXES = ["Fakka", "Ewa", "Yo", "Wazzaaaa", "Wsg", "Ey", "Assalam alaykum"]
 
