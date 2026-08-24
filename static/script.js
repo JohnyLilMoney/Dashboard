@@ -153,7 +153,13 @@ function togglePanel(server) {
     window.__backgroundPaused = true;
     clearTimeout(bgPauseTimer);
 
+    const wasOpen = card.classList.contains('panel-open');
     card.classList.toggle('panel-open');
+
+    if (server === 'android' && wasOpen) {
+        const iframe = document.getElementById('android-stream');
+        if (iframe) iframe.src = 'about:blank';
+    }
 
     bgPauseTimer = setTimeout(() => {
         window.__backgroundPaused = false;
@@ -215,6 +221,40 @@ async function sendCommand(command) {
     } else {
         typeIn(header, 'Command failed or server unreachable');
     }
+}
+
+async function loadPhoneStream() {
+    const iframe = document.getElementById('android-stream');
+    if (!iframe) return;
+
+    const tryRequest = async (token) => {
+        const headers = {};
+        if (token) headers['X-Auth-Token'] = token;
+        const res = await fetch('/api/run/basicfit', { method: 'POST', headers });
+        if (res.status === 401) return { needAuth: true };
+        if (!res.ok) return { needAuth: false, httpError: res.status };
+        const data = await res.json();
+        return { needAuth: false, data };
+    };
+
+    let result = await tryRequest(null);
+
+    if (result.needAuth) {
+        try {
+            const token = await ensureAuthToken();
+            result = await tryRequest(token);
+        } catch (err) {
+            return;
+        }
+    }
+
+    if (result.httpError || result.needAuth || !result.data || !result.data.ok) {
+        typeIn(header, 'Authentication failed.');
+        return;
+    }
+
+    const udid = iframe.dataset.udid;
+    iframe.src = `/phone/#!action=stream&udid=${encodeURIComponent(udid)}&player=webcodecs`;
 }
 
 async function updateModels() {
