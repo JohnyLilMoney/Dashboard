@@ -27,8 +27,12 @@ const serverState = {
         details: {
             'Expected IP Refresh': '--',
         }
+    },
+    android: {
+        status: 'offline',
+        uptime: null,
+        details: {}
     }
-
 };
 
 const header = document.getElementById('header');
@@ -157,29 +161,10 @@ function togglePanel(server) {
 }
 
 async function sendCommand(command) {
-    if (command === 'mcips' || command === 'whatsthis') {
-        try {
-            const res = await fetch(`/api/run/${command}`, { method: 'POST' });
-            if (!res.ok) {
-                alert(`Network error: Server responded with status ${res.status}`);
-                return;
-            }
-            const data = await res.json();
-            if (typeof data.ok === 'string') {
-                showToast(data.ok, null, false, -1);
-            } else {
-                alert(`Unexpected response shape: ${JSON.stringify(data)}`);
-            }
-    }     catch (err) {
-            alert(`JS Error: ${err.message}`);
-        }
-        return;
-    }
-
     const isDestructive = command.includes('shutdown') || command.includes('reboot');
-    const serverName = command.startsWith('ai') ? 'AI Server' : 'Minecraft Server';
+
     if (isDestructive) {
-        if (!confirm(`Are you sure you want to run ${command} on ${serverName}?`)) {
+        if (!confirm(`Are you sure you want to run ${command}?`)) {
             return;
         }
     }
@@ -187,13 +172,9 @@ async function sendCommand(command) {
     const tryRequest = async (token) => {
         const headers = {};
         if (token) headers['X-Auth-Token'] = token;
-        const res = await fetch(`/api/run/${command}`, {
-            method: 'POST',
-            headers
-        });
-        if (res.status === 401) {
-            return { needAuth: true };
-        }
+        const res = await fetch(`/api/run/${command}`, { method: 'POST', headers });
+        if (res.status === 401) return { needAuth: true };
+        if (!res.ok) return { needAuth: false, httpError: res.status };
         const data = await res.json();
         return { needAuth: false, data };
     };
@@ -205,8 +186,13 @@ async function sendCommand(command) {
             const token = await ensureAuthToken();
             result = await tryRequest(token);
         } catch (err) {
-            return;
+            return; // user cancelled the auth modal
         }
+    }
+
+    if (result.httpError) {
+        alert(`Network error: Server responded with status ${result.httpError}`);
+        return;
     }
 
     if (result.needAuth || !result.data) {
@@ -221,7 +207,9 @@ async function sendCommand(command) {
         return;
     }
 
-    if (data.ok) {
+    if (typeof data.ok === 'string') {
+        showToast(data.ok, null, false, -1);
+    } else if (data.ok) {
         typeIn(header, 'Command sent');
     } else {
         typeIn(header, 'Command failed or server unreachable');
