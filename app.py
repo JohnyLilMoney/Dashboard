@@ -13,7 +13,7 @@ else:
 
 update_db()
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, make_request
 import subprocess
 import re
 import socket
@@ -263,9 +263,7 @@ def basicfit():
 
 @app.route('/api/stream_auth')
 def stream_auth():
-    original_uri = request.headers.get('X-Original-URI', '')
-    query = urlparse(original_uri).query
-    token = parse_qs(query).get('stream_token', [None])[0]
+    token = request.cookies.get('stream_auth')
     if _stream_token_is_valid(token):
         return '', 200
     return '', 401
@@ -394,6 +392,18 @@ def run_command(name):
 
     if name in START_COMMANDS:
         mark_start_pending(START_COMMANDS[name])
+
+    if name == 'basicfit':
+        resp = make_response(jsonify({'ok': True}))
+        resp.set_cookie(
+            'stream_auth', result,
+            max_age=STREAM_TOKEN_TTL_SECONDS,
+            path='/phone/',
+            httponly=True,
+            secure=True,
+            samesite='Strict'
+        )
+        return resp
 
     return {'ok': result}
 
