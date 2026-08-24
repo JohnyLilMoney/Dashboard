@@ -261,6 +261,17 @@ def _stream_token_is_valid(token):
 def basicfit():
     return _issue_stream_token()
 
+def _stream_token_cleanup_loop():
+    while not _shutdown.is_set():
+        now = time.time()
+        with _stream_tokens_lock:
+            expired = [t for t, exp in _stream_tokens.items() if exp < now]
+            for t in expired:
+                del _stream_tokens[t]
+        _shutdown.wait(300)  # every 5 minutes is plenty given 60s TTLs
+
+threading.Thread(target=_stream_token_cleanup_loop, daemon=True).start()
+
 @app.route('/api/stream_auth')
 def stream_auth():
     token = request.cookies.get('stream_auth')
