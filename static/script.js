@@ -187,6 +187,7 @@ async function sendCommand(command) {
             result = await tryRequest(token);
         } catch (err) {
             typeIn(header, 'Password cancelled.');
+			return;
         }
     }
 
