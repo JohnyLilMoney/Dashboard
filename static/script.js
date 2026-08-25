@@ -221,37 +221,16 @@ async function sendCommand(command) {
     } else {
         typeIn(header, 'Command failed or server unreachable');
     }
+
+	return data;
 }
 
 async function loadPhoneStream() {
     const iframe = document.getElementById('android-stream');
     if (!iframe) return;
 
-    const tryRequest = async (token) => {
-        const headers = {};
-        if (token) headers['X-Auth-Token'] = token;
-        const res = await fetch('/api/run/basicfit', { method: 'POST', headers });
-        if (res.status === 401) return { needAuth: true };
-        if (!res.ok) return { needAuth: false, httpError: res.status };
-        const data = await res.json();
-        return { needAuth: false, data };
-    };
-
-    let result = await tryRequest(null);
-
-    if (result.needAuth) {
-        try {
-            const token = await ensureAuthToken();
-            result = await tryRequest(token);
-        } catch (err) {
-            return;
-        }
-    }
-
-    if (result.httpError || result.needAuth || !result.data || !result.data.ok) {
-        typeIn(header, 'Authentication failed.');
-        return;
-    }
+    const data = await sendCommand('basicfit');
+    if (!data || !data.ok) return;
 
     const udid = iframe.dataset.udid;
     iframe.src = `/phone/#!action=stream&udid=${encodeURIComponent(udid)}&player=webcodecs`;
