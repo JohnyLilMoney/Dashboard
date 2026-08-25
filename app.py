@@ -13,7 +13,7 @@ else:
 
 update_db()
 
-from flask import Flask, jsonify, render_template, request, make_request
+from flask import Flask, jsonify, render_template, request, make_response
 import subprocess
 import re
 import socket
