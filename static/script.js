@@ -192,7 +192,7 @@ async function sendCommand(command) {
             const token = await ensureAuthToken();
             result = await tryRequest(token);
         } catch (err) {
-            typeIn(header, 'Password cancelled.');
+            typeIn(header, 'Password cancelled');
 			return;
         }
     }
@@ -203,7 +203,7 @@ async function sendCommand(command) {
     }
 
     if (result.needAuth || !result.data) {
-        typeIn(header, 'Authentication failed.');
+        typeIn(header, 'Authentication failed');
         return;
     }
 
