@@ -941,3 +941,37 @@ body {
     background: var(--accent-hover);
     border-color: var(--accent-hover);
 }
+
+.phone-stream-section {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    transition:
+        max-height 0.45s ease,
+        opacity 0.3s ease,
+        padding 0.45s ease;
+}
+
+.phone-stream-section.stream-active {
+    max-height: 1200px;
+    opacity: 1;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.phone-stream-container {
+    width: 100%;
+    margin-top: 8px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+#android-stream {
+    display: block;
+    width: 100%;
+    aspect-ratio: 9 / 19;
+    border: 0;
+    border-radius: 8px;
+}
