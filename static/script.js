@@ -230,13 +230,23 @@ async function sendCommand(command) {
 
 async function loadPhoneStream() {
     const iframe = document.getElementById('android-stream');
-    if (!iframe) return;
+    const streamSection = document.getElementById('android-stream-section');
+    const panel = document.getElementById('android-panel');
+
+    if (!iframe || !streamSection || !panel) return;
 
     const data = await sendCommand('basicfit');
     if (!data || !data.ok) return;
 
+    // Don't start the stream if the panel was closed while authenticating.
+    if (!panel.classList.contains('panel-open')) return;
+
     const udid = iframe.dataset.udid;
     iframe.src = `/phone/#!action=stream&udid=${encodeURIComponent(udid)}&player=webcodecs`;
+
+    requestAnimationFrame(() => {
+        streamSection.classList.add('stream-active');
+    });
 }
 
 async function updateModels() {
