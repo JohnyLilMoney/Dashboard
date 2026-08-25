@@ -236,15 +236,14 @@ async function sendCommand(command) {
 async function loadPhoneStream() {
     const iframe = document.getElementById('android-stream');
     const streamSection = document.getElementById('android-stream-section');
-    const panel = document.getElementById('android-panel');
+    const card = document.getElementById('android-server');
 
-    if (!iframe || !streamSection || !panel) return;
+    if (!iframe || !streamSection || !card) return;
 
     const data = await sendCommand('basicfit');
     if (!data || !data.ok) return;
 
-    // Don't start the stream if the panel was closed while authenticating.
-    if (!panel.classList.contains('panel-open')) return;
+    if (!card.classList.contains('panel-open')) return;
 
     const udid = iframe.dataset.udid;
     iframe.src = `/phone/#!action=stream&udid=${encodeURIComponent(udid)}&player=webcodecs`;
