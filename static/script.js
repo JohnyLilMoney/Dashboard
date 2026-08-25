@@ -159,9 +159,14 @@ function togglePanel(server) {
     if (server === 'android' && wasOpen) {
         const iframe = document.getElementById('android-stream');
         const streamSection = document.getElementById('android-stream-section');
- 
-        if (iframe) iframe.src = 'about:blank';
+
         if (streamSection) streamSection.classList.remove('stream-active');
+
+        if (iframe) {
+            setTimeout(() => {
+                iframe.src = 'about:blank';
+            }, 450);
+        }
     }
 
     bgPauseTimer = setTimeout(() => {
