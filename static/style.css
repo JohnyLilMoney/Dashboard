@@ -947,11 +947,10 @@ body {
     opacity: 0;
     overflow: hidden;
     padding-top: 0;
-    padding-bottom: 0;
-    transition:
-        max-height 0.45s ease,
-        opacity 0.3s ease,
-        padding 0.45s ease;
+    padding-bottom: 0;;
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.45s ease, opacity 0.3s ease;
 }
 
 .phone-stream-section.stream-active {
@@ -959,6 +958,7 @@ body {
     opacity: 1;
     padding-top: 12px;
     padding-bottom: 12px;
+    grid-template-rows: 1fr;
 }
 
 .phone-stream-container {
@@ -974,4 +974,9 @@ body {
     aspect-ratio: 9 / 19;
     border: 0;
     border-radius: 8px;
+}
+
+.phone-stream-section > .phone-stream-container {
+    min-height: 0;
+    overflow: hidden;
 }
