@@ -51,6 +51,8 @@ log.setLevel(logging.ERROR)
 
 OLLAMA_HOST = "http://100.100.1.1:11434"
 
+ANDROID_UDID = os.environ.get('ANDROID_UDID', '100.100.2.0:5555')
+
 ZYXEL_HOST = "https://192.168.1.1"
 ZYXEL_ACCOUNT = "admin"
 ZYXEL_PASSWORD_B64 = os.environ.get('ZYXEL_PASSWORD_B64')
@@ -645,25 +647,40 @@ def get_server_status(ip, is_mc=False):
 
         return status_data
 
-def get_display_status(name, ip, is_mc):
-    real_status = get_server_status(ip, is_mc)
+def get_display_status(name, check_fn):
+    real_status = check_fn()
 
     with _pending_lock:
         started_at = _pending_starts.get(name)
         if started_at is None:
             return real_status
-
         if real_status['status'] in ('online', 'unavailable'):
             del _pending_starts[name]
             return real_status
-
         if time.time() - started_at > START_TIMEOUT:
             del _pending_starts[name]
             return real_status
-
         starting_status = dict(real_status)
         starting_status['status'] = 'starting'
         return starting_status
+
+def get_android_status(udid, timeout=1):
+    try:
+        state = subprocess.run(
+            ['adb', '-s', udid, 'get-state'],
+            capture_output=True, text=True, timeout=timeout
+        )
+        if state.returncode != 0 or state.stdout.strip() != 'device':
+            return {'status': 'offline', 'uptime': None, 'details': {}}
+
+        out = subprocess.run(
+            ['adb', '-s', udid, 'shell', 'cat', '/proc/uptime'],
+            capture_output=True, text=True, timeout=timeout
+        )
+        seconds = int(float(out.stdout.split()[0]))
+        return {'status': 'online', 'uptime': _format_duration(seconds), 'details': {}}
+    except Exception:
+        return {'status': 'offline', 'uptime': None, 'details': {}}
 
 _status_cache = {}
 _cache_lock = threading.Lock()
@@ -674,6 +691,14 @@ POLL_INTERVAL = 1
 IDLE_TIMEOUT = 15
 
 _cache_updated_at = 0.0
+
+SERVICE_CHECKS = {
+    'ai':      lambda: get_display_status('ai', lambda: get_server_status('100.100.1.1', is_mc=False)),
+    'mc':      lambda: get_display_status('mc', lambda: get_server_status('100.100.1.2', is_mc=True)),
+    'mail':    get_local_mail_status,
+    'router':  get_router_status,
+    'android': lambda: get_display_status('android', lambda: get_android_status(ANDROID_UDID)),
+}
 
 def _status_loop():
     global _cache_updated_at
@@ -687,14 +712,20 @@ def _status_loop():
                 _cache_updated_at = time.time()
         _shutdown.wait(POLL_INTERVAL)
 
+_status_pool = ThreadPoolExecutor(max_workers=len(SERVICE_CHECKS) * 2)
+
 def _do_status_check():
-    servers = {'ai': ('100.100.1.1', False), 'mc': ('100.100.1.2', True)}
-    result = {'mail': get_local_mail_status(), 'router': get_router_status()}
-    with ThreadPoolExecutor(max_workers=len(servers)) as executor:
-        futures = {name: executor.submit(get_display_status, name, ip, is_mc)
-                   for name, (ip, is_mc) in servers.items()}
-        for name, future in futures.items():
-            result[name] = future.result()
+    futures = {name: _status_pool.submit(fn) for name, fn in SERVICE_CHECKS.items()}
+
+    result = {}
+    for name, future in futures.items():
+        try:
+            result[name] = future.result(timeout=1)
+        except FuturesTimeoutError:
+            result[name] = {'status': 'offline', 'uptime': None, 'details': {'error': 'timed out'}}
+        except Exception as e:
+            result[name] = {'status': 'offline', 'uptime': None, 'details': {'error': str(e)}}
+
     return result
 
 threading.Thread(target=_status_loop, daemon=True).start()
