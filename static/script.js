@@ -249,9 +249,9 @@ async function loadPhoneStream() {
     const host = window.location.host; // ts.johnylilmoney.nl
     const wsUrl = `wss://${host}/phone/?action=proxy-adb&remote=tcp:8886&udid=${encodeURIComponent(udid)}`;
 
-    iframe.src = `/phone/#!action=stream&udid=${encodeURIComponent(udid)}&player=webcodecs&ws=${encodeURIComponent(wsUrl)}&fitToScreen=true`;
+    iframe.src = `/phone/#!action=stream&udid=${encodeURIComponent(udid)}&player=webcodecs&ws=${encodeURIComponent(wsUrl)}&fitToScreen=true&maxSize=720`;
 
-    requestAnimationFrame(() => {
+	requestAnimationFrame(() => {
         streamSection.classList.add('stream-active');
     });
 }
