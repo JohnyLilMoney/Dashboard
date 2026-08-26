@@ -20,7 +20,7 @@ import socket
 import json
 import time
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 import logging
 from mcstatus import JavaServer
 import requests
