@@ -663,20 +663,16 @@ def get_display_status(name, check_fn):
         starting_status = dict(real_status)
         starting_status['status'] = 'starting'
         return starting_status
-
+        
 def get_android_status(udid, timeout=1):
     try:
-        state = subprocess.run(
-            ['adb', '-s', udid, 'get-state'],
-            capture_output=True, text=True, timeout=timeout
-        )
-        if state.returncode != 0 or state.stdout.strip() != 'device':
-            return {'status': 'offline', 'uptime': None, 'details': {}}
-
         out = subprocess.run(
-            ['adb', '-s', udid, 'shell', 'cat', '/proc/uptime'],
+            ['adb', '-s', udid, 'shell',
+             'cat /proc/uptime'],
             capture_output=True, text=True, timeout=timeout
         )
+        if out.returncode != 0 or not out.stdout.strip():
+            return {'status': 'offline', 'uptime': None, 'details': {}}
         seconds = int(float(out.stdout.split()[0]))
         return {'status': 'online', 'uptime': _format_duration(seconds), 'details': {}}
     except Exception:
