@@ -641,6 +641,14 @@ async function fetchStatus() {
             }
         }
 
+		if (data.android) {
+            serverState.android.status = data.android.status;
+            serverState.android.uptime = data.android.uptime;
+            if (data.android.details) {
+                serverState.android.details = data.android.details;
+            }
+		}
+
         updateAllUI();
         await updateModels();
     } catch (error) {
