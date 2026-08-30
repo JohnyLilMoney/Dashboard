@@ -51,7 +51,7 @@ log.setLevel(logging.ERROR)
 
 OLLAMA_HOST = "http://100.100.1.1:11434"
 
-ANDROID_UDID = os.environ.get('ANDROID_UDID', '100.100.2.0:5555')
+ANDROID_UDID = os.environ.get('ANDROID_UDID', 'R5CR91EPWNF')
 
 ZYXEL_HOST = "https://192.168.1.1"
 ZYXEL_ACCOUNT = "admin"
