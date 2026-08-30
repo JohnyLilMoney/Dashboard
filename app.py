@@ -325,7 +325,7 @@ def index():
         if packs:
             animation_pack = random.choice(packs)
 
-    return render_template('index.html', animation_pack=animation_pack)
+    return render_template('index.html', animation_pack=animation_pack, android_udid=ANDROID_UDID)
 
 def get_available_backgrounds(exclude=None):
     backgrounds_path = os.path.join(app.static_folder, 'backgrounds')
@@ -379,7 +379,7 @@ def background_pack(pack_name):
     else:
         animation_pack = None
     
-    return render_template('index.html', animation_pack=animation_pack)
+    return render_template('index.html', animation_pack=animation_pack, android_udid=ANDROID_UDID)
 
 @app.route('/api/header')
 def api_header():
