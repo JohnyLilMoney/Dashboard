@@ -159,7 +159,7 @@ function togglePanel(server) {
     if (server === 'android' && wasOpen) {
         const iframe = document.getElementById('android-stream');
         const streamSection = document.getElementById('android-stream-section');
-		const fsBtn = document.getElementById('android-fullscreen-btn');
+		const fsBtn = document.getElementById('android-fullscreen-wrap');
 
         if (streamSection) streamSection.classList.remove('stream-active');
 		if (fsBtn) fsBtn.classList.remove('visible');
@@ -255,8 +255,8 @@ async function loadPhoneStream() {
 
     requestAnimationFrame(() => {
         streamSection.classList.add('stream-active');
-        const fsBtn = document.getElementById('android-fullscreen-btn');
-        if (fsBtn) fsBtn.classList.add('visible');
+        const fsWrap = document.getElementById('android-fullscreen-wrap');
+        if (fsWrap) fsWrap.classList.add('visible');
     });
 }
 
