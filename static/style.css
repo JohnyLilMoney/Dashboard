@@ -343,7 +343,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     margin-bottom: 5px;
-    gap: 8px;
+    gap: 6px;
 }
 
 .action-btn {
@@ -983,7 +983,8 @@ body {
 
 .fullscreen-btn-wrap {
     display: grid;
-    grid-template-columns: 0fr;
+    grid-template-columns: minmax(0, 0fr);
+    min-width: 0;
     opacity: 0;
     overflow: hidden;
     margin-left: 0;
@@ -991,7 +992,7 @@ body {
 }
 
 .fullscreen-btn-wrap.visible {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     opacity: 1;
 }
 
