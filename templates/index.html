@@ -177,17 +177,19 @@
             <span class="section-label">Actions</span>
             <div class="action-buttons">
                 <button class="action-btn start" onclick="loadPhoneStream()">Basic Fit Access</button>
-			    <button class="action-btn forward fullscreen-btn" id="android-fullscreen-btn" onclick="toggleAndroidFullscreen()">Fullscreen</button>
-                <button class="action-btn start" onclick="sendCommand('clipboard')">Get Clipboard</button>
+                <div class="fullscreen-btn-wrap" id="android-fullscreen-wrap">
+                    <button class="action-btn forward fullscreen-btn" id="android-fullscreen-btn" onclick="toggleAndroidFullscreen()">Fullscreen</button>
+                </div>
+				<button class="action-btn start" onclick="sendCommand('clipboard')">Get Clipboard</button>
             </div>
         </div>
         <div class="panel-section">
             <span class="section-label">Info</span>
-    <div class="phone-stream-section" id="android-stream-section">
-        <div class="phone-stream-container">
-            <iframe id="android-stream" data-udid="100.100.2.0:5555" allow="fullscreen" allowfullscreen></iframe>
-        </div>
-    </div>
+                <div class="phone-stream-section" id="android-stream-section">
+                <div class="phone-stream-container">
+                    <iframe id="android-stream" data-udid="100.100.2.0:5555" allow="fullscreen" allowfullscreen></iframe>
+                </div>
+            </div>
 		</div>
     </div>
 </div>
