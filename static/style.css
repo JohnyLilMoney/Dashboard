@@ -341,7 +341,6 @@ body {
 
 .action-buttons {
     display: flex;
-    gap: 8px;
     flex-wrap: wrap;
     margin-bottom: 5px;
 }
@@ -986,7 +985,8 @@ body {
     grid-template-columns: 0fr;
     opacity: 0;
     overflow: hidden;
-    transition: grid-template-columns 0.35s ease, opacity 0.3s ease;
+    margin-left: 0;
+    transition: grid-template-columns 0.35s ease, opacity 0.3s ease, margin-left 0.35s ease;
 }
 
 .fullscreen-btn-wrap.visible {
@@ -1017,16 +1017,4 @@ body {
     opacity: 1;
     transform: scale(1);
     pointer-events: auto;
-}
-
-#android-stream:fullscreen {
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-}
-
-#android-stream:-webkit-full-screen {
-    width: 100vw;
-    height: 100vh;
-    background: #000;
 }
