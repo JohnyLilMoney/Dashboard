@@ -982,20 +982,16 @@ body {
 }
 
 .fullscreen-btn-wrap {
-    display: block;
-    max-width: 0;
-    opacity: 0;
-    overflow: hidden;
-    margin-left: 0;
-    transition: max-width 0.35s ease, opacity 0.3s ease, margin-left 0.35s ease;
+    display: none;
 }
 
 .fullscreen-btn-wrap.visible {
-    max-width: 200px; /* generous upper bound, doesn't need to be exact */
-    opacity: 1;
+    display: block;
+    width: 100%;
 }
 
 .fullscreen-btn-wrap > .fullscreen-btn {
+    width: 100%;
     white-space: nowrap;
 }
 
@@ -1009,10 +1005,4 @@ body {
     width: 100vw;
     height: 100vh;
     background: #000;
-}
-
-.fullscreen-btn.visible {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
 }
