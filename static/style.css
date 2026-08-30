@@ -981,11 +981,36 @@ body {
     overflow: hidden;
 }
 
-.fullscreen-btn {
+.fullscreen-btn-wrap {
+    display: grid;
+    grid-template-columns: 0fr;
     opacity: 0;
-    transform: scale(0.85);
-    pointer-events: none;
-    transition: opacity 0.35s ease, transform 0.35s ease;
+    overflow: hidden;
+    transition: grid-template-columns 0.35s ease, opacity 0.3s ease;
+}
+
+.fullscreen-btn-wrap.visible {
+    grid-template-columns: 1fr;
+    opacity: 1;
+}
+
+.fullscreen-btn-wrap > .fullscreen-btn {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+#android-stream:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+}
+
+#android-stream:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
+    background: #000;
 }
 
 .fullscreen-btn.visible {
