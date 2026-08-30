@@ -159,8 +159,10 @@ function togglePanel(server) {
     if (server === 'android' && wasOpen) {
         const iframe = document.getElementById('android-stream');
         const streamSection = document.getElementById('android-stream-section');
+		const fsBtn = document.getElementById('android-fullscreen-btn');
 
         if (streamSection) streamSection.classList.remove('stream-active');
+		if (fsBtn) fsBtn.classList.remove('visible');
 
         if (iframe) {
             setTimeout(() => {
@@ -251,9 +253,27 @@ async function loadPhoneStream() {
 
     iframe.src = `/phone/#!action=stream&udid=${encodeURIComponent(udid)}&player=webcodecs&ws=${encodeURIComponent(wsUrl)}`;
 
-	requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
         streamSection.classList.add('stream-active');
+        const fsBtn = document.getElementById('android-fullscreen-btn');
+        if (fsBtn) fsBtn.classList.add('visible');
     });
+}
+
+function toggleAndroidFullscreen() {
+    const iframe = document.getElementById('android-stream');
+    if (!iframe) return;
+
+    const requestFs = iframe.requestFullscreen
+        || iframe.webkitRequestFullscreen
+        || iframe.mozRequestFullScreen
+        || iframe.msRequestFullscreen;
+
+    if (requestFs) {
+        requestFs.call(iframe).catch(err => {
+            console.warn('Fullscreen request failed:', err);
+        });
+    }
 }
 
 async function updateModels() {
