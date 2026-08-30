@@ -982,25 +982,21 @@ body {
 }
 
 .fullscreen-btn-wrap {
-    display: grid;
-    grid-template-columns: minmax(0, 0fr);
-    min-width: 0;
+    display: block;
+    max-width: 0;
     opacity: 0;
     overflow: hidden;
     margin-left: 0;
-    transition: grid-template-columns 0.35s ease, opacity 0.3s ease, margin-left 0.35s ease;
+    transition: max-width 0.35s ease, opacity 0.3s ease, margin-left 0.35s ease;
 }
 
 .fullscreen-btn-wrap.visible {
-    grid-template-columns: minmax(0, 1fr);
+    max-width: 200px; /* generous upper bound, doesn't need to be exact */
     opacity: 1;
 }
 
 .fullscreen-btn-wrap > .fullscreen-btn {
-    min-width: 0;
-    overflow: hidden;
     white-space: nowrap;
-    flex-shrink: 0;
 }
 
 #android-stream:fullscreen {
