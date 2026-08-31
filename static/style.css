@@ -964,20 +964,30 @@ body {
 }
 
 .phone-stream-container {
+    position: relative;
     width: 100%;
     min-height: 0;
     margin-top: 8px;
+    overflow: visible;
     border-radius: 8px;
-    overflow: hidden;
-    clip-path: inset(0 round 8px);
 }
 
 #android-stream {
     display: block;
     width: 100%;
-    aspect-ratio: 9/16;
+    aspect-ratio: 9 / 16;
     border: 0;
     border-radius: 0;
+}
+
+.phone-stream-container::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 8px solid #000;
+    border-radius: 8px;
+    box-sizing: border-box;
+    pointer-events: none;
 }
 
 .phone-stream-section > .phone-stream-container {
