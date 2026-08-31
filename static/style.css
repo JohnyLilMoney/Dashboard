@@ -949,8 +949,7 @@ body {
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    padding-top: 0;
-    padding-bottom: 0;;
+    padding: 0;
     display: grid;
     grid-template-rows: 0fr;
     transition: grid-template-rows 0.45s ease, opacity 0.3s ease;
@@ -966,17 +965,19 @@ body {
 
 .phone-stream-container {
     width: 100%;
+    min-height: 0;
     margin-top: 8px;
-    overflow: hidden;
     border-radius: 8px;
+    overflow: hidden;
+    clip-path: inset(0 round 8px);
 }
 
 #android-stream {
     display: block;
     width: 100%;
-    aspect-ratio: 9 / 16;
+    aspect-ratio: 16;
     border: 0;
-    border-radius: 8px;
+    border-radius: 0;
 }
 
 .phone-stream-section > .phone-stream-container {
