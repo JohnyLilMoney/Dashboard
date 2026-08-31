@@ -975,7 +975,7 @@ body {
 #android-stream {
     display: block;
     width: 100%;
-    aspect-ratio: 16;
+    aspect-ratio: 9/16;
     border: 0;
     border-radius: 0;
 }
