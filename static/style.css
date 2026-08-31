@@ -968,7 +968,8 @@ body {
     width: 100%;
     aspect-ratio: 9 / 16;
     margin-top: 8px;
-    overflow: visible;
+    overflow: hidden;
+    border-radius: 8px;
 }
 
 #android-stream {
@@ -976,33 +977,6 @@ body {
     width: 100%;
     height: 100%;
     border: 0;
-}
-
-.phone-stream-container::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-
-    pointer-events: none;
-    z-index: 10;
-
-    background: var(--phone-stream-background, #fff);
-
-    clip-path: polygon(
-        0 0,
-        100% 0,
-        100% 100%,
-        0 100%
-    );
-
-    border-radius: 8px;
-
-    padding: 0;
-}
-
-.phone-stream-section > .phone-stream-container {
-    min-height: 0;
-    overflow: hidden;
 }
 
 .fullscreen-btn-wrap {
@@ -1030,3 +1004,4 @@ body {
     height: 100vh;
     background: #000;
 }
+
