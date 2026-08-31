@@ -965,14 +965,16 @@ body {
 
 .phone-stream-container {
     position: relative;
+    width: 100%;.phone-stream-container {
+    position: relative;
     width: 100%;
     min-height: 0;
     margin-top: 8px;
-    overflow: hidden; 
+    padding: 8px;
+    box-sizing: border-box;
     border-radius: 8px;
-    transform: translateZ(0);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
+    overflow: hidden;
+    background: #000:
 }
 
 #android-stream {
@@ -981,14 +983,32 @@ body {
     aspect-ratio: 9 / 16;
     border: 0;
     border-radius: 0;
-    object-fit: cover; 
+    object-fit: cover;
 }
+
+    min-height: 0;
+    margin-top: 8px;
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #888; /* whatever your surrounding gray is */
+}
+
+#android-stream {
+    display: block;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    border: 0;
+    border-radius: 0;
+    object-fit: cover;
+}
+
 
 .phone-stream-container::after {
     content: "";
     position: absolute;
     inset: 0;
-    border: 0px solid #000;
     border-radius: 8px;
     box-sizing: border-box;
     pointer-events: none;
