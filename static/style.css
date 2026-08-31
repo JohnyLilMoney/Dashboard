@@ -956,10 +956,8 @@ body {
 }
 
 .phone-stream-section.stream-active {
-    max-height: 1200px;
+    max-height: 1080px;
     opacity: 1;
-    padding-top: 12px;
-    padding-bottom: 12px;
     grid-template-rows: 1fr;
 }
 
