@@ -964,7 +964,7 @@ body {
 .phone-stream-container {
     position: relative;
     width: 100%;
-    aspect-ratio: 9 / 16;
+    aspect-ratio: 9 / 20;
     margin-top: 8px;
 }
 
