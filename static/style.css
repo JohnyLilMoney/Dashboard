@@ -968,8 +968,11 @@ body {
     width: 100%;
     min-height: 0;
     margin-top: 8px;
-    overflow: visible;
+    overflow: hidden; 
     border-radius: 8px;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 #android-stream {
@@ -978,6 +981,7 @@ body {
     aspect-ratio: 9 / 16;
     border: 0;
     border-radius: 0;
+    object-fit: cover; 
 }
 
 .phone-stream-container::after {
