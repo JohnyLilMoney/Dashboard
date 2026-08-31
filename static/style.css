@@ -966,30 +966,19 @@ body {
 .phone-stream-container {
     position: relative;
     width: 100%;
+    aspect-ratio: 9 / 16;
     min-height: 0;
     margin-top: 8px;
     overflow: hidden;
     border-radius: 8px;
-
-    transform: translateZ(0);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
+    isolation: isolate;
 }
 
 #android-stream {
     display: block;
     width: 100%;
-    aspect-ratio: 9 / 16;
+    height: 100%;
     border: 0;
-}
-
-.phone-stream-container::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 8px;
-    box-sizing: border-box;
-    pointer-events: none;
 }
 
 .phone-stream-section > .phone-stream-container {
