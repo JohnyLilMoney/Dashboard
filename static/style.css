@@ -984,7 +984,7 @@ body {
     content: "";
     position: absolute;
     inset: 0;
-    border: 8px solid #000;
+    border: 0px solid #000;
     border-radius: 8px;
     box-sizing: border-box;
     pointer-events: none;
