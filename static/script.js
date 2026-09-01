@@ -224,6 +224,12 @@ async function sendCommand(command) {
         return;
     }
 
+    if (typeof url === 'string' && data.url) {{
+        putClipboard(data.url);
+        typeIn(header, 'Command sent');
+        return;
+    }
+
     if (typeof data.ok === 'string') {
         showToast(data.ok, null, false, -1);
     } else if (data.ok) {
@@ -274,6 +280,10 @@ function toggleAndroidFullscreen() {
             console.warn('Fullscreen request failed:', err);
         });
     }
+}
+
+function putClipboard(text) {
+    return;
 }
 
 async function updateModels() {
@@ -399,7 +409,7 @@ if (state.details && detailsTable) {
         if (rows[i]) {
             const isPlayersRow = (server === 'mc' && label === 'Players Online');
             const isModelsRow = (server === 'ai' && label === 'Loaded Model');
-            const isRouterIPRow = (server === 'router' && label === 'Expected IP Refresh');  // <-- NEW
+            const isRouterIPRow = (server === 'router' && label === 'Expected IP Refresh');
 
             if (isPlayersRow) {
                 updatePlayers(server, state);

@@ -150,7 +150,7 @@ COMMANDS = {
     'mcips':      lambda: "Default: johnylilmoney.nl | TailScale: ts.johnylilmoney.nl | ZeroTier: zt.johnylilmoney.nl",
     'whatsthis':  lambda: "Odido Klik en Klaar comes with a dynamic ip. This means that the ip changes whenever the router starts, and every 24h after that. When this happens, people not using tailscale/zerotier won't be able to connect to the website for 0-2 minutes, and mc players will be kicked. The expected refresh is only the next one if the router doesn't lose power until then.",
     'basicfit':   lambda: basicfit(),
-    'clipboard':  lambda: None
+    'clipboard':  lambda: clipboard()
 }
 
 START_COMMANDS = {'ai': 'ai', 'mc': 'mc', 'aireboot': 'ai', 'mcreboot': 'mc'}
@@ -240,7 +240,7 @@ def get_tailscale_user_for_request():
 
 _stream_tokens = {}
 _stream_tokens_lock = threading.Lock()
-STREAM_TOKEN_TTL_SECONDS = 60  # only needs to outlive the initial connect, not the whole session
+STREAM_TOKEN_TTL_SECONDS = 60
 
 def _issue_stream_token():
     token = secrets.token_urlsafe(24)
@@ -270,7 +270,7 @@ def _stream_token_cleanup_loop():
             expired = [t for t, exp in _stream_tokens.items() if exp < now]
             for t in expired:
                 del _stream_tokens[t]
-        _shutdown.wait(300)  # every 5 minutes is plenty given 60s TTLs
+        _shutdown.wait(300)
 
 threading.Thread(target=_stream_token_cleanup_loop, daemon=True).start()
 
@@ -738,6 +738,24 @@ def api_status():
             _status_cache.update(fresh)
             _cache_updated_at = time.time()
         return dict(_status_cache)
+
+url = ""
+
+@app.route('/api/pastelink', methods=['POST'])
+def api_pastelink():
+    if not request.remote_addr == '100.100.1.3':
+        return jsonify({'error': 'unauthorized, stop tryna mess with shit'}), 401
+    data = request.get_json(silent=True) or {}
+    clip = data.get('url', '')
+    if not clip:
+        return jsonify({'error': 'no url provided'}), 400
+    global url
+    url = clip
+    return jsonify({'ok': True})
+
+def clipboard():
+    global url
+    return {'url': url}
 
 # for use with flask, won't run if used with gunicorn
 if __name__ == '__main__':
