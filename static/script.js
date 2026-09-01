@@ -224,7 +224,7 @@ async function sendCommand(command) {
         return;
     }
 
-    if (typeof url === 'string' && data.url) {{
+    if (typeof url === 'string' && data.url) {
         putClipboard(data.url);
         typeIn(header, 'Command sent');
         return;
@@ -339,7 +339,6 @@ async function updateModels() {
     }
 }
 
-
 function updatePlayers(server, state) {
     const playerListContainer = document.getElementById(`${server}-player-list`);
     const countSpan = document.getElementById(`${server}-player-count`);
@@ -402,30 +401,30 @@ function updateAllUI() {
             uptimeEl.textContent = state.uptime || '--';
         }
 
-if (state.details && detailsTable) {
-    const rows = detailsTable.querySelectorAll('tr');
-    let i = 0;
-    for (const [label, value] of Object.entries(state.details)) {
-        if (rows[i]) {
-            const isPlayersRow = (server === 'mc' && label === 'Players Online');
-            const isModelsRow = (server === 'ai' && label === 'Loaded Model');
-            const isRouterIPRow = (server === 'router' && label === 'Expected IP Refresh');
+        if (state.details && detailsTable) {
+            const rows = detailsTable.querySelectorAll('tr');
+            let i = 0;
+            for (const [label, value] of Object.entries(state.details)) {
+                if (rows[i]) {
+                    const isPlayersRow = (server === 'mc' && label === 'Players Online');
+                    const isModelsRow = (server === 'ai' && label === 'Loaded Model');
+                    const isRouterIPRow = (server === 'router' && label === 'Expected IP Refresh');
 
-            if (isPlayersRow) {
-                updatePlayers(server, state);
-            } else if (isModelsRow) {
-                // do nothing for now (handled by updateModels)
-            } else if (isRouterIPRow) {
-                const valueSpan = document.getElementById('router-next-ip-change');
-                if (valueSpan) valueSpan.textContent = value;
-            } else {
-                rows[i].children[0].textContent = label;
-                rows[i].children[1].textContent = value;
+                    if (isPlayersRow) {
+                        updatePlayers(server, state);
+                    } else if (isModelsRow) {
+                        // do nothing for now (handled by updateModels)
+                    } else if (isRouterIPRow) {
+                        const valueSpan = document.getElementById('router-next-ip-change');
+                        if (valueSpan) valueSpan.textContent = value;
+                    } else {
+                        rows[i].children[0].textContent = label;
+                        rows[i].children[1].textContent = value;
+                    }
+                }
+                i++;
             }
         }
-        i++;
-    }
-}
     }
 }
 
