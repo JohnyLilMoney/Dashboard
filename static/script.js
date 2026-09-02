@@ -290,12 +290,17 @@ function putClipboard(text) {
     return;
 }
 
-const copyBtn = document.getElementById('copy-button');
+async function copyClipboardData() {
+    const clipboardSpan = document.getElementById('android-clipboard');
+    const copyBtn = document.getElementById('copy-btn');
 
-copyBtn.addEventListener('click', async () => {
-    const textToCopy = clipboardSpan.innerText;
-    
+    if (!clipboardSpan || !copyBtn) {
+        console.error("Required elements for copying were not found.");
+        return;
+    }
+
     try {
+        const textToCopy = clipboardSpan.innerText;
         await navigator.clipboard.writeText(textToCopy);
         
         const originalText = copyBtn.innerText;
@@ -306,7 +311,7 @@ copyBtn.addEventListener('click', async () => {
     } catch (err) {
         console.error('Failed to copy text: ', err);
     }
-});
+}
 
 async function updateModels() {
     const server = 'ai';
