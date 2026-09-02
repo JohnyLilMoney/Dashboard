@@ -291,11 +291,18 @@ function putClipboard(text) {
 }
 
 async function copyClipboardData() {
+    const clipboardSpan = document.getElementById('android-clipboard');
+    const copyBtn = document.getElementById('copy-button');
+
+    if (!clipboardSpan || !copyBtn) {
+        console.error("Required elements for copying were not found.");
+        return;
+    }
+
     try {
         const textToCopy = clipboardSpan.innerText;
         await navigator.clipboard.writeText(textToCopy);
 
-        const copyBtn = document.getElementById('copy-button');
         const originalIcon = copyBtn.innerHTML;
 
         copyBtn.innerHTML = `
