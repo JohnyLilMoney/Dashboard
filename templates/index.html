@@ -185,11 +185,27 @@
 		        </div>
 		        <div class="panel-section">
 		            <span class="section-label">Info</span>
-		                <div class="phone-stream-section" id="android-stream-section">
-		                <div class="phone-stream-container">
-		                    <iframe id="android-stream" data-udid="{{ android_udid }}" allow="fullscreen" allowfullscreen></iframe>
-		                </div>
-		            </div>
+                    <table class="details-table" id="android-details">
+                        <tr>
+                            <td class="hidden-label">Android Info</td>
+                            <td class="full-width-cell">
+                                <div class="models-section">
+                                    <div class="models-header">
+                                        <span class="models-label">Clipboard:</span>
+                                        <span class="model-name" id="android-clipboard">No clipboard data</span>
+                                        <span class="model-icon" id="copy-button" onclick="copyClipboardData()">📋</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="full-width-cell">
+                                <div class="phone-stream-section" id="android-stream-section">
+                                    <div class="phone-stream-container">
+                                        <iframe id="android-stream" data-udid="{{ android_udid }}" allow="fullscreen" allowfullscreen></iframe>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
 				</div>
 		    </div>
 		</div>

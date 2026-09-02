@@ -224,7 +224,7 @@ async function sendCommand(command) {
         return;
     }
 
-    if (typeof url === 'string' && data.url) {
+    if (data.url && typeof data.url === 'string') {
         putClipboard(data.url);
         typeIn(header, 'Command sent');
         return;
@@ -283,8 +283,30 @@ function toggleAndroidFullscreen() {
 }
 
 function putClipboard(text) {
+    const clipboardSpan = document.getElementById('android-clipboard');
+    if (clipboardSpan) {
+        clipboardSpan.innerText = text;
+    }
     return;
 }
+
+const copyBtn = document.getElementById('copy-btn');
+
+copyBtn.addEventListener('click', async () => {
+    const textToCopy = clipboardSpan.innerText;
+    
+    try {
+        await navigator.clipboard.writeText(textToCopy);
+        
+        const originalText = copyBtn.innerText;
+        copyBtn.innerText = "✅ Copied!";
+        setTimeout(() => {
+            copyBtn.innerText = originalText;
+        }, 1000);
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+    }
+});
 
 async function updateModels() {
     const server = 'ai';
