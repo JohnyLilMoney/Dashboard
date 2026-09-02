@@ -291,23 +291,31 @@ function putClipboard(text) {
 }
 
 async function copyClipboardData() {
-    const clipboardSpan = document.getElementById('android-clipboard');
-    const copyBtn = document.getElementById('copy-button');
-
-    if (!clipboardSpan || !copyBtn) {
-        console.error("Required elements for copying were not found.");
-        return;
-    }
-
     try {
         const textToCopy = clipboardSpan.innerText;
         await navigator.clipboard.writeText(textToCopy);
-        
-        const originalText = copyBtn.innerText;
-        copyBtn.innerText = "✅ Copied!";
+
+        const copyBtn = document.getElementById('copy-button');
+        const originalIcon = copyBtn.innerHTML;
+
+        copyBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"></path>
+            </svg>
+        `;
+
         setTimeout(() => {
-            copyBtn.innerText = originalText;
+            copyBtn.innerHTML = originalIcon;
         }, 1000);
+
     } catch (err) {
         console.error('Failed to copy text: ', err);
     }
