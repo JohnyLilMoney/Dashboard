@@ -752,8 +752,15 @@ def api_pastelink():
     clip = data.get('url', '')
     if not clip:
         return jsonify({'error': 'no url provided'}), 400
+    
+    index = clip.find('https://')
+    if index != -1:
+        clippedclip = clip[index:]
+    else:
+        clippedclip = clip
+    
     global url
-    url = clip
+    url = clippedclip
     return jsonify({'ok': True})
 
 def clipboard():
