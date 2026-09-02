@@ -292,7 +292,7 @@ function putClipboard(text) {
 
 async function copyClipboardData() {
     const clipboardSpan = document.getElementById('android-clipboard');
-    const copyBtn = document.getElementById('copy-btn');
+    const copyBtn = document.getElementById('copy-button');
 
     if (!clipboardSpan || !copyBtn) {
         console.error("Required elements for copying were not found.");
