@@ -290,7 +290,7 @@ function putClipboard(text) {
     return;
 }
 
-const copyBtn = document.getElementById('copy-btn');
+const copyBtn = document.getElementById('copy-button');
 
 copyBtn.addEventListener('click', async () => {
     const textToCopy = clipboardSpan.innerText;
