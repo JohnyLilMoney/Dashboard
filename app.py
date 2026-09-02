@@ -418,6 +418,9 @@ def run_command(name):
         )
         return resp
 
+    if isinstance(result, dict):
+        return result
+
     return {'ok': result}
 
 @app.route('/api/like_background')
@@ -739,7 +742,7 @@ def api_status():
             _cache_updated_at = time.time()
         return dict(_status_cache)
 
-url = ""
+url = "No clipboard data"
 
 @app.route('/api/pastelink', methods=['POST'])
 def api_pastelink():
