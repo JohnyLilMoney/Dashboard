@@ -300,9 +300,14 @@ window.initAnimation = function(shadowRoot) {
     let time = 0;
 
     function resize() {
-        const rect = shadowRoot.host.getBoundingClientRect();
-        width = rect.width;
-        height = rect.height;
+        // Use clientWidth/clientHeight (integer) rather than
+        // getBoundingClientRect (fractional) so this always matches the
+        // size check in animate() below. Mixing the two causes a spurious
+        // mismatch on nearly every frame - e.g. 974 !== 974.4 - which was
+        // forcing a full resize()+initObjects() (all-new random fish,
+        // plants, bubbles) on every single animation frame.
+        width = shadowRoot.host.clientWidth;
+        height = shadowRoot.host.clientHeight;
         canvas.width = width * dpr;
         canvas.height = height * dpr;
         canvas.style.width = width + 'px';
