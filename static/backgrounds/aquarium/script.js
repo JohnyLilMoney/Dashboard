@@ -291,6 +291,10 @@ window.initAnimation = function(shadowRoot) {
     let bubbles = [];
     const maxBubbles = 25;
 
+    // Cached background gradient. Rebuilt only on resize instead of every
+    // frame, since it never changes unless the canvas height changes.
+    let bgGradient = null;
+
     let frameId = null;
     let running = true;
     let time = 0;
@@ -304,6 +308,13 @@ window.initAnimation = function(shadowRoot) {
         canvas.style.width = width + 'px';
         canvas.style.height = height + 'px';
         ctx.scale(dpr, dpr);
+        makeBackgroundGradient();
+    }
+
+    function makeBackgroundGradient() {
+        bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+        bgGradient.addColorStop(0, COLORS.waterTop);
+        bgGradient.addColorStop(1, COLORS.waterBottom);
     }
 
     function initObjects() {
@@ -336,10 +347,12 @@ window.initAnimation = function(shadowRoot) {
 
         time++;
 
-        const grad = ctx.createLinearGradient(0, 0, 0, height);
-        grad.addColorStop(0, COLORS.waterTop);
-        grad.addColorStop(1, COLORS.waterBottom);
-        ctx.fillStyle = grad;
+        // Full-canvas repaint each frame: canvas has no built-in "erase old
+        // sprite position" step, so every moving object (fish, bubbles) needs
+        // the background redrawn underneath it first. The gradient itself is
+        // cached (see makeBackgroundGradient) since it doesn't change frame
+        // to frame - only fillRect runs here.
+        ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, width, height);
 
         ctx.fillStyle = COLORS.sand;
