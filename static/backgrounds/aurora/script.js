@@ -21,6 +21,37 @@ window.initAnimation = function(shadowRoot) {
     shadowRoot.appendChild(auroraCanvas);
     const auroraCtx = auroraCanvas.getContext('2d');
 
+    const BLUR_MASK = 'linear-gradient(to bottom, black 0%, black 60%, transparent 66.66%)';
+
+    const blurBgCanvas = document.createElement('canvas');
+    blurBgCanvas.id = 'aurora-canvas-blur';
+    blurBgCanvas.style.position = 'absolute';
+    blurBgCanvas.style.top = '0';
+    blurBgCanvas.style.left = '0';
+    blurBgCanvas.style.width = '100%';
+    blurBgCanvas.style.height = '100%';
+    blurBgCanvas.style.pointerEvents = 'none';
+    blurBgCanvas.style.filter = 'blur(6px)';
+    blurBgCanvas.style.maskImage = BLUR_MASK;
+    blurBgCanvas.style.webkitMaskImage = BLUR_MASK;
+    shadowRoot.appendChild(blurBgCanvas);
+    const blurBgCtx = blurBgCanvas.getContext('2d');
+
+    const blurAuroraCanvas = document.createElement('canvas');
+    blurAuroraCanvas.id = 'aurora-layer-blur';
+    blurAuroraCanvas.style.position = 'absolute';
+    blurAuroraCanvas.style.top = '0';
+    blurAuroraCanvas.style.left = '0';
+    blurAuroraCanvas.style.width = '100%';
+    blurAuroraCanvas.style.height = '100%';
+    blurAuroraCanvas.style.pointerEvents = 'none';
+    blurAuroraCanvas.style.opacity = '0.9';
+    blurAuroraCanvas.style.filter = 'blur(6px)';
+    blurAuroraCanvas.style.maskImage = BLUR_MASK;
+    blurAuroraCanvas.style.webkitMaskImage = BLUR_MASK;
+    shadowRoot.appendChild(blurAuroraCanvas);
+    const blurAuroraCtx = blurAuroraCanvas.getContext('2d');
+
     let W, H;
     let nativeW, nativeH;
     let animId = null;
@@ -369,12 +400,22 @@ window.initAnimation = function(shadowRoot) {
         canvas.style.width = nativeW + 'px';
         canvas.style.height = nativeH + 'px';
 
+        blurBgCanvas.width = nativeW;
+        blurBgCanvas.height = nativeH;
+        blurBgCanvas.style.width = nativeW + 'px';
+        blurBgCanvas.style.height = nativeH + 'px';
+
         W = Math.round(nativeW * 0.25);
         H = Math.round(nativeH * 0.25);
         auroraCanvas.width = W;
         auroraCanvas.height = H;
         auroraCanvas.style.width = nativeW + 'px';
         auroraCanvas.style.height = nativeH + 'px';
+
+        blurAuroraCanvas.width = W;
+        blurAuroraCanvas.height = H;
+        blurAuroraCanvas.style.width = nativeW + 'px';
+        blurAuroraCanvas.style.height = nativeH + 'px';
     }
 
     function scaleStarPositions(scaleX, scaleY) {
@@ -427,6 +468,12 @@ window.initAnimation = function(shadowRoot) {
         auroraCtx.clearRect(0, 0, W, H);
         sheets.forEach(s => s.draw(auroraCtx, time));
 
+        blurBgCtx.clearRect(0, 0, nativeW, nativeH);
+        blurBgCtx.drawImage(canvas, 0, 0);
+
+        blurAuroraCtx.clearRect(0, 0, W, H);
+        blurAuroraCtx.drawImage(auroraCanvas, 0, 0);
+
         frameCount++;
         animId = requestAnimationFrame(animate);
     }
@@ -444,6 +491,8 @@ window.initAnimation = function(shadowRoot) {
             }
             bgCtx.clearRect(0, 0, nativeW, nativeH);
             auroraCtx.clearRect(0, 0, W, H);
+            blurBgCtx.clearRect(0, 0, nativeW, nativeH);
+            blurAuroraCtx.clearRect(0, 0, W, H);
             sheets = [];
         },
         resize: handleResize
