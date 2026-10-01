@@ -583,13 +583,17 @@ def get_server_status(ip, is_mc=False):
             output = None
 
         if not output:
-            if not is_mc and win_future.result():
-                return {
-                    'status': 'unavailable',
-                    'uptime': None,
-                    'details': {'Loaded Model': 'Booted into Windows'},
-                    'models_list': []
-                }
+            if not is_mc:
+                try:
+                    if win_future.result(timeout=0.4):
+                        return {
+                            'status': 'unavailable',
+                            'uptime': None,
+                            'details': {'Loaded Model': 'Booted into Windows'},
+                            'models_list': []
+                        }
+                except Exception:
+                    pass
             status_data = {'status': 'offline', 'uptime': None, 'details': {}}
             if is_mc:
                 status_data['details']['Players Online'] = '0'
@@ -600,53 +604,55 @@ def get_server_status(ip, is_mc=False):
             return status_data
 
         output = output.strip()
-        status_data = {
-            'status': 'online',
-            'uptime': '--',
-            'details': {}
-        }
+        status_data = {'status': 'online', 'uptime': '--', 'details': {}}
 
-    if 'up ' in output:
-        parts = output.split('up ')
-        if len(parts) > 1:
-            uptime_string = parts[1].split(',')[0].strip()
-
-            days_match = re.search(r'(\d+)\s+day', uptime_string)
-            days = f"{days_match.group(1)}d " if days_match else ""
-
-            time_remainder = re.sub(r'\d+\s+days?\,?\s*', '', uptime_string)
-
-            if ':' in time_remainder:
-                h_m = time_remainder.split(':')
-                status_data['uptime'] = (
-                    f"{days}{int(h_m[0])}h {int(h_m[1])}m"
-                )
-            else:
-                min_match = re.search(r'(\d+)\s+min', time_remainder)
-                if min_match:
-                    status_data['uptime'] = (
-                        f"{days}{min_match.group(1)}m"
-                    )
-
-                hour_match = re.search(r'(\d+)\s+hour', time_remainder)
-                if hour_match:
-                    status_data['uptime'] = (
-                        f"{days}{hour_match.group(1)}h"
-                    )
+        if 'up ' in output:
+            parts = output.split('up ')
+            if len(parts) > 1:
+                uptime_string = parts[1].split(',')[0].strip()
+                days_match = re.search(r'(\d+)\s+day', uptime_string)
+                days = f"{days_match.group(1)}d " if days_match else ""
+                time_remainder = re.sub(r'\d+\s+days?\,?\s*', '', uptime_string)
+                if ':' in time_remainder:
+                    h_m = time_remainder.split(':')
+                    status_data['uptime'] = f"{days}{int(h_m[0])}h {int(h_m[1])}m"
+                else:
+                    min_match = re.search(r'(\d+)\s+min', time_remainder)
+                    hour_match = re.search(r'(\d+)\s+hour', time_remainder)
+                    if min_match:
+                        status_data['uptime'] = f"{days}{min_match.group(1)}m"
+                    elif hour_match:
+                        status_data['uptime'] = f"{days}{hour_match.group(1)}h"
 
         if is_mc:
-            mc_info = mc_future.result()
-            if mc_info.get('online'):
-                status_data['details']['Players Online'] = (
-                    f"{mc_info.get('online_players', 0)}/{mc_info.get('max_players', 0)}"
-                )
-                status_data['players_list'] = mc_info.get('players_list', [])
-            else:
+            try:
+                mc_info = mc_future.result(timeout=0.4)
+                if mc_info.get('online'):
+                    status_data['details']['Players Online'] = (
+                        f"{mc_info.get('online_players', 0)}/{mc_info.get('max_players', 0)}"
+                    )
+                    status_data['players_list'] = mc_info.get('players_list', [])
+                else:
+                    status_data['details']['Players Online'] = '0'
+                    status_data['players_list'] = []
+            except Exception:
                 status_data['details']['Players Online'] = '0'
                 status_data['players_list'] = []
         else:
-            status_data['details'] = {'Loaded Model': '--'}
-            status_data['models_list'] = []
+            model_name = '--'
+            models_list = []
+            try:
+                r = requests.get(f"http://{ip}:11434/api/ps", timeout=0.4)
+                r.raise_for_status()
+                data = r.json()
+                for m in data.get('models', []):
+                    models_list.append(m.get('name', 'unknown'))
+                if models_list:
+                    model_name = models_list[0]
+            except Exception:
+                pass  # fall through to '--'
+            status_data['details'] = {'Loaded Model': model_name}
+            status_data['models_list'] = models_list
 
         return status_data
 
