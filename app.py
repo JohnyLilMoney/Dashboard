@@ -20,7 +20,7 @@ import socket
 import json
 import time
 import threading
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError, wait
 import logging
 from mcstatus import JavaServer
 import requests
@@ -536,7 +536,7 @@ def ping_minecraft(ip, port=25565):
 
 def _check_windows_alive(ip, port):
     try:
-        s = socket.create_connection((ip, port), timeout=1)
+        s = socket.create_connection((ip, port), timeout=0.5)
         s.close()
         return True
     except ConnectionRefusedError:
@@ -569,92 +569,71 @@ def get_local_mail_status():
         'details': {}
     }
 
+_probe_pool = ThreadPoolExecutor(max_workers=16)
+PROBE_BUDGET = 0.8
+
+def _result(future, deadline):
+    """Result of a future, or None if it failed or missed the deadline."""
+    try:
+        return future.result(timeout=max(0, deadline - time.monotonic()))
+    except Exception:
+        return None
+
+def _uptime_from_proc(text):
+    try:
+        return _format_duration(int(float(text.split()[0])))
+    except Exception:
+        return '--'
+
+def _ollama_get(ip, path):
+    r = requests.get(f"http://{ip}:11434{path}", timeout=0.7)
+    r.raise_for_status()
+    return r.json()
+
 def get_server_status(ip, is_mc=False):
-    with ThreadPoolExecutor(max_workers=2) as ex:
-        ssh_future = ex.submit(ssh_output, ip, 'uptime')
-        if is_mc:
-            mc_future = ex.submit(ping_minecraft, ip)
+    deadline = time.monotonic() + PROBE_BUDGET
+    ssh_f = _probe_pool.submit(ssh_output, ip, 'cat /proc/uptime')
+
+    if is_mc:
+        mc_f = _probe_pool.submit(ping_minecraft, ip)
+        ssh_out = _result(ssh_f, deadline)
+        if not ssh_out:
+            return {'status': 'offline', 'uptime': None,
+                    'details': {'Players Online': '0'}, 'players_list': []}
+        mc_info = _result(mc_f, deadline) or {}
+        if mc_info.get('online'):
+            players = f"{mc_info.get('online_players', 0)}/{mc_info.get('max_players', 0)}"
+            players_list = mc_info.get('players_list', [])
         else:
-            win_future = ex.submit(_check_windows_alive, '100.100.2.2', TEST)
+            players, players_list = '0', []
+        return {'status': 'online', 'uptime': _uptime_from_proc(ssh_out),
+                'details': {'Players Online': players}, 'players_list': players_list}
 
-        try:
-            output = ssh_future.result()
-        except Exception:
-            output = None
+    win_f = _probe_pool.submit(_check_windows_alive, '100.100.2.2', TEST)
+    ps_f = _probe_pool.submit(_ollama_get, ip, '/api/ps')
+    tags_f = _probe_pool.submit(_ollama_get, ip, '/api/tags')
 
-        if not output:
-            if not is_mc:
-                try:
-                    if win_future.result(timeout=0.4):
-                        return {
-                            'status': 'unavailable',
-                            'uptime': None,
-                            'details': {'Loaded Model': 'Booted into Windows'},
-                            'models_list': []
-                        }
-                except Exception:
-                    pass
-            status_data = {'status': 'offline', 'uptime': None, 'details': {}}
-            if is_mc:
-                status_data['details']['Players Online'] = '0'
-                status_data['players_list'] = []
-            else:
-                status_data['details']['Loaded Model'] = '--'
-                status_data['models_list'] = []
-            return status_data
+    ssh_out = _result(ssh_f, deadline)
+    ps = _result(ps_f, deadline)
+    tags = _result(tags_f, deadline)
 
-        output = output.strip()
-        status_data = {'status': 'online', 'uptime': '--', 'details': {}}
+    if not ssh_out and ps is None:
+        if _result(win_f, deadline):
+            return {'status': 'unavailable', 'uptime': None,
+                    'details': {'Loaded Model': 'Booted into Windows'}, 'models_list': []}
+        return {'status': 'offline', 'uptime': None,
+                'details': {'Loaded Model': '--'}, 'models_list': []}
 
-        if 'up ' in output:
-            parts = output.split('up ')
-            if len(parts) > 1:
-                uptime_string = parts[1].split(',')[0].strip()
-                days_match = re.search(r'(\d+)\s+day', uptime_string)
-                days = f"{days_match.group(1)}d " if days_match else ""
-                time_remainder = re.sub(r'\d+\s+days?\,?\s*', '', uptime_string)
-                if ':' in time_remainder:
-                    h_m = time_remainder.split(':')
-                    status_data['uptime'] = f"{days}{int(h_m[0])}h {int(h_m[1])}m"
-                else:
-                    min_match = re.search(r'(\d+)\s+min', time_remainder)
-                    hour_match = re.search(r'(\d+)\s+hour', time_remainder)
-                    if min_match:
-                        status_data['uptime'] = f"{days}{min_match.group(1)}m"
-                    elif hour_match:
-                        status_data['uptime'] = f"{days}{hour_match.group(1)}h"
+    loaded = [m.get('name', 'unknown') for m in (ps or {}).get('models', [])]
+    installed = [m.get('name', 'unknown') for m in (tags or {}).get('models', [])]
+    names = installed + [n for n in loaded if n not in installed]
 
-        if is_mc:
-            try:
-                mc_info = mc_future.result(timeout=0.4)
-                if mc_info.get('online'):
-                    status_data['details']['Players Online'] = (
-                        f"{mc_info.get('online_players', 0)}/{mc_info.get('max_players', 0)}"
-                    )
-                    status_data['players_list'] = mc_info.get('players_list', [])
-                else:
-                    status_data['details']['Players Online'] = '0'
-                    status_data['players_list'] = []
-            except Exception:
-                status_data['details']['Players Online'] = '0'
-                status_data['players_list'] = []
-        else:
-            model_name = '--'
-            models_list = []
-            try:
-                r = requests.get(f"http://{ip}:11434/api/ps", timeout=0.4)
-                r.raise_for_status()
-                data = r.json()
-                for m in data.get('models', []):
-                    models_list.append(m.get('name', 'unknown'))
-                if models_list:
-                    model_name = models_list[0]
-            except Exception:
-                pass  # fall through to '--'
-            status_data['details'] = {'Loaded Model': model_name}
-            status_data['models_list'] = models_list
-
-        return status_data
+    return {
+        'status': 'online',
+        'uptime': _uptime_from_proc(ssh_out) if ssh_out else '--',
+        'details': {'Loaded Model': loaded[0] if loaded else '--'},
+        'models_list': [{'name': n, 'loaded': n in loaded} for n in names],
+    }
 
 def get_display_status(name, check_fn):
     real_status = check_fn()
@@ -719,18 +698,29 @@ def _status_loop():
 
 _status_pool = ThreadPoolExecutor(max_workers=len(SERVICE_CHECKS) * 2)
 
+def _offline_status(name):
+    s = {'status': 'offline', 'uptime': None, 'details': {}}
+    if name == 'ai':
+        s['details'] = {'Loaded Model': '--'}
+        s['models_list'] = []
+    elif name == 'mc':
+        s['details'] = {'Players Online': '0'}
+        s['players_list'] = []
+    return s
+
 def _do_status_check():
     futures = {name: _status_pool.submit(fn) for name, fn in SERVICE_CHECKS.items()}
+    done, _ = wait(futures.values(), timeout=1)
 
     result = {}
-    for name, future in futures.items():
-        try:
-            result[name] = future.result(timeout=1)
-        except FuturesTimeoutError:
-            result[name] = {'status': 'offline', 'uptime': None, 'details': {'error': 'timed out'}}
-        except Exception as e:
-            result[name] = {'status': 'offline', 'uptime': None, 'details': {'error': str(e)}}
-
+    for name, f in futures.items():
+        if f in done:
+            try:
+                result[name] = f.result()
+                continue
+            except Exception as e:
+                logging.getLogger('dashboard').warning("%s check failed: %r", name, e)
+        result[name] = _offline_status(name)
     return result
 
 threading.Thread(target=_status_loop, daemon=True).start()
