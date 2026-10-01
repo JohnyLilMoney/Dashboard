@@ -291,19 +291,35 @@ window.initAnimation = function(shadowRoot) {
     let bubbles = [];
     const maxBubbles = 25;
 
+    // Cached background gradient. Rebuilt only on resize instead of every
+    // frame, since it never changes unless the canvas height changes.
+    let bgGradient = null;
+
     let frameId = null;
     let running = true;
     let time = 0;
 
     function resize() {
-        const rect = shadowRoot.host.getBoundingClientRect();
-        width = rect.width;
-        height = rect.height;
+        // Use clientWidth/clientHeight (integer) rather than
+        // getBoundingClientRect (fractional) so this always matches the
+        // size check in animate() below. Mixing the two causes a spurious
+        // mismatch on nearly every frame - e.g. 974 !== 974.4 - which was
+        // forcing a full resize()+initObjects() (all-new random fish,
+        // plants, bubbles) on every single animation frame.
+        width = shadowRoot.host.clientWidth;
+        height = shadowRoot.host.clientHeight;
         canvas.width = width * dpr;
         canvas.height = height * dpr;
         canvas.style.width = width + 'px';
         canvas.style.height = height + 'px';
         ctx.scale(dpr, dpr);
+        makeBackgroundGradient();
+    }
+
+    function makeBackgroundGradient() {
+        bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+        bgGradient.addColorStop(0, COLORS.waterTop);
+        bgGradient.addColorStop(1, COLORS.waterBottom);
     }
 
     function initObjects() {
@@ -336,10 +352,12 @@ window.initAnimation = function(shadowRoot) {
 
         time++;
 
-        const grad = ctx.createLinearGradient(0, 0, 0, height);
-        grad.addColorStop(0, COLORS.waterTop);
-        grad.addColorStop(1, COLORS.waterBottom);
-        ctx.fillStyle = grad;
+        // Full-canvas repaint each frame: canvas has no built-in "erase old
+        // sprite position" step, so every moving object (fish, bubbles) needs
+        // the background redrawn underneath it first. The gradient itself is
+        // cached (see makeBackgroundGradient) since it doesn't change frame
+        // to frame - only fillRect runs here.
+        ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, width, height);
 
         ctx.fillStyle = COLORS.sand;
